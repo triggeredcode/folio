@@ -78,6 +78,24 @@ async def network_info():
     return {"ip": ip, "port": PORT}
 
 
+@app.get("/api/sessions/active")
+async def get_active_sessions():
+    """List active sessions, most recent first."""
+    sessions = sorted(SESSIONS.values(), key=lambda s: s.created_at_ms, reverse=True)
+    return {
+        "sessions": [
+            {
+                "session_id": s.session_id,
+                "mode": s.mode,
+                "lang": s.lang,
+                "pages": len(s.pages),
+                "created_at_ms": s.created_at_ms,
+            }
+            for s in sessions
+        ]
+    }
+
+
 @app.post("/api/session")
 async def create_session(req: SessionCreateRequest):
     session = Session(mode=req.mode, lang=req.lang)

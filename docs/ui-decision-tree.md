@@ -45,7 +45,9 @@
 |--------|-----------|----------|-------|
 | Click Reader | HOME | READER_CAPTURE | POST /api/session → store session_id → navigate /reader?session=ID |
 | Click Tutor | HOME | TUTOR_CAPTURE | POST /api/session → store session_id → navigate /tutor?session=ID |
-| Scan QR (phone) | HOME | HOME (on phone) | Phone opens same URL, shows same HOME page |
+| Join active session | HOME | READER/TUTOR | Click "Join session" → navigate /{mode}?session=ID (reuses existing session) |
+| Scan QR (phone) | HOME | AUTO_JOIN | Phone opens URL with ?join=1 → auto-redirects to most recent active session |
+| Scan QR (no active) | HOME | HOME (on phone) | Phone opens URL with ?join=1 but no sessions exist → shows normal HOME |
 
 ### Error States
 

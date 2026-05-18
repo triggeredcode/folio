@@ -48,6 +48,20 @@ export async function getSession(sessionId: string) {
   return res.json();
 }
 
+export interface ActiveSession {
+  session_id: string;
+  mode: string;
+  lang: string;
+  pages: number;
+  created_at_ms: number;
+}
+
+export async function getActiveSessions(): Promise<{ sessions: ActiveSession[] }> {
+  const res = await fetch(`${API_URL}/api/sessions/active`);
+  if (!res.ok) throw new Error(`Failed to fetch active sessions: ${res.status}`);
+  return res.json();
+}
+
 export async function getSessionPages(sessionId: string): Promise<{ page_count: number; pages: PageData[] }> {
   const res = await fetch(`${API_URL}/api/session/${sessionId}/pages`);
   if (!res.ok) throw new Error(`Failed to fetch pages: ${res.status}`);
