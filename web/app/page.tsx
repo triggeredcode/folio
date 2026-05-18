@@ -48,10 +48,10 @@ export default function Home() {
       <div className="w-full max-w-5xl flex flex-col lg:flex-row items-center gap-16 lg:gap-20">
 
         {/* Left side — content */}
-        <div className="flex-1 max-w-lg space-y-8">
-          <header className="space-y-5">
-            <h1 className="text-7xl font-bold tracking-tighter"
-              style={{ color: "var(--text-primary)" }}>
+        <div className="flex-1 max-w-xl space-y-10">
+          <header className="space-y-6">
+            <h1 className="font-bold tracking-tighter"
+              style={{ color: "var(--text-primary)", fontSize: "clamp(5rem, 12vw, 10rem)", lineHeight: "0.9" }}>
               folio
             </h1>
             <p className="text-xl leading-relaxed"
@@ -124,22 +124,22 @@ export default function Home() {
         </div>
 
         {/* Right side — Phone mockup with QR */}
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-5">
           <div
-            className="relative rounded-[2.5rem] p-3 shadow-2xl"
+            className="relative rounded-[3rem] p-4 shadow-2xl"
             style={{
               background: "var(--bg-elevated)",
               border: "3px solid var(--border)",
-              width: "260px",
+              width: "320px",
             }}
           >
             {/* Phone notch */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 rounded-b-2xl"
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 rounded-b-2xl"
               style={{ background: "var(--bg)" }} />
 
             {/* Phone screen */}
-            <div className="rounded-[2rem] overflow-hidden flex flex-col items-center justify-center py-10 px-6"
-              style={{ background: "var(--bg)", minHeight: "380px" }}>
+            <div className="rounded-[2.5rem] overflow-hidden flex flex-col items-center justify-center py-14 px-8"
+              style={{ background: "var(--bg)", minHeight: "480px" }}>
               <div className="text-center space-y-5">
                 <p className="text-xs font-medium uppercase tracking-widest"
                   style={{ color: "var(--text-muted)" }}>
@@ -147,17 +147,17 @@ export default function Home() {
                 </p>
 
                 {appUrl ? (
-                  <div className="p-3 rounded-2xl inline-block" style={{ background: "white" }}>
+                  <div className="p-4 rounded-2xl inline-block" style={{ background: "white" }}>
                     <QRCodeSVG
                       value={appUrl}
-                      size={160}
+                      size={200}
                       level="M"
                       bgColor="white"
                       fgColor="#0c0c0f"
                     />
                   </div>
                 ) : (
-                  <div className="w-[160px] h-[160px] mx-auto rounded-xl animate-pulse"
+                  <div className="w-[200px] h-[200px] mx-auto rounded-xl animate-pulse"
                     style={{ background: "var(--bg-surface)" }} />
                 )}
 
@@ -176,12 +176,12 @@ export default function Home() {
             </div>
 
             {/* Phone home indicator */}
-            <div className="mx-auto mt-2 w-24 h-1 rounded-full"
+            <div className="mx-auto mt-3 w-28 h-1.5 rounded-full"
               style={{ background: "var(--border)" }} />
           </div>
 
-          <p className="text-[11px] text-center max-w-[220px]" style={{ color: "var(--text-muted)" }}>
-            Same Wi-Fi required. Camera works over HTTPS.
+          <p className="text-xs text-center max-w-[260px]" style={{ color: "var(--text-muted)" }}>
+            Same Wi-Fi required. Snap pages from your phone camera.
           </p>
         </div>
       </div>
