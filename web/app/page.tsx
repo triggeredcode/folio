@@ -12,7 +12,26 @@ export default function Home() {
   const [appUrl, setAppUrl] = useState("");
 
   useEffect(() => {
-    setAppUrl(window.location.href);
+    async function getNetworkUrl() {
+      try {
+        const res = await fetch("/api/network-info");
+        if (res.ok) {
+          const { ip, port, ngrok_url } = await res.json();
+          if (ngrok_url) {
+            setAppUrl(ngrok_url);
+          } else {
+            const proto = window.location.protocol;
+            const currentPort = window.location.port || port;
+            setAppUrl(`${proto}//${ip}:${currentPort}`);
+          }
+        } else {
+          setAppUrl(window.location.href);
+        }
+      } catch {
+        setAppUrl(window.location.href);
+      }
+    }
+    getNetworkUrl();
   }, []);
 
   async function handleModeSelect(mode: "reader" | "tutor") {
