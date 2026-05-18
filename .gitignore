@@ -29,3 +29,6 @@ Thumbs.db
 # Logs
 *.log
 /tmp/
+
+# SSL certificates
+web/certificates/

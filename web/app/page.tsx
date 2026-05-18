@@ -17,7 +17,8 @@ export default function Home() {
         if (res.ok) {
           const { ip, port } = await res.json();
           const currentPort = window.location.port || port;
-          setAppUrl(`http://${ip}:${currentPort}`);
+          const proto = window.location.protocol;
+          setAppUrl(`${proto}//${ip}:${currentPort}`);
         } else {
           setAppUrl(window.location.href);
         }
