@@ -1,0 +1,28 @@
+{
+  "text": "Eukaryotic cells contain a variety of membrane-bound organelles. Each organelle performs a specific function essential for the cell's survival. The major cell organelles include the nucleus, mitochondria, endoplasmic reticulum, Golgi apparatus, lysosomes, and plastids (in plant cells).\n\nThe endoplasmic reticulum is a network of tiny tubular structures scattered throughout the cytoplasm. It divides the intracellular space into two distinct compartments: the luminal (inside ER) and the extra luminal (cytoplasm).\n\nThe ER exists in two forms:\n(i) Rough Endoplasmic Reticulum (RER) \u2014 bears ribosomes on its surface and is the site of protein synthesis.\n(ii) Smooth Endoplasmic Reticulum (SER) \u2014 lacks ribosomes and is the site of lipid synthesis. SER also plays a role in detoxification in liver cells.\n\nThe ER is continuous with the outer nuclear membrane and helps in intracellular transport of materials.",
+  "headings": [
+    {
+      "level": 2,
+      "text": "8.3 CELL ORGANELLES"
+    },
+    {
+      "level": 3,
+      "text": "8.3.1 Endoplasmic Reticulum (ER)"
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "Figure 8.4",
+      "label": "Endoplasmic Reticulum (Rough and Smooth)",
+      "description": "The diagram illustrates the internal structure of a cell, focusing on the endoplasmic reticulum (ER) relative to the nucleus. At the center is the Nucleus. Surrounding the nucleus is the ER network. The network is depicted as having two distinct regions. The Rough Endoplasmic Reticulum (RER) is shown as a highly structured, continuous layer immediately surrounding the nucleus, indicated by small dots representing ribosomes on its surface. The Smooth Endoplasmic Reticulum (SER) is shown as an outer, less structured layer surrounding the RER and the nucleus, representing the continuation of the ER into the cytoplasm.",
+      "labels": [
+        "Nucleus",
+        "RER (with ribosomes)",
+        "SER"
+      ]
+    }
+  ],
+  "captions": [
+    "Figure 8.4: Endoplasmic Reticulum (Rough and Smooth)"
+  ]
+}

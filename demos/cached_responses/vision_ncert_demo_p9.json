@@ -1,0 +1,30 @@
+{
+  "text": "Eukaryotic cells carry out various life processes in different cell organelles independently at the same time.\n\nCell organelles help in building new materials, removing waste, and providing energy to the cell. They work together to perform all functions of a cell. In other words, a cell is like a tiny living factory, with each of its part doing a specific job.\n\nLet us explore these specialised structures present inside a cell.\n\nThe nucleus contains chromosomes, which are visible as rod-shaped structures only when the cell is about to divide. Chromosomes contain information for inheritance of characters from parents to the next generation in the form of DNA (deoxyribonucleic acid) molecules. Chromosomes are composed of DNA and specific proteins. DNA molecules contain the genetic information. The functional segments of DNA are called genes. In a non-dividing cell, this DNA is present as part of chromatin material. Chromatin is visible as an entangled mass of thread-like structures. Whenever the cell is about to divide, the chromatin material gets organised into chromosomes (Fig. 2.12).\n\nProkaryotic cells do not have a well-defined nucleus. Their DNA is present as a single circular molecule associated with specific proteins. The region containing this genetic material is called the nucleoid.",
+  "headings": [
+    {
+      "level": 2,
+      "text": "2.3.1 Why do eukaryotic cells need these organelles?"
+    },
+    {
+      "level": 3,
+      "text": "Nucleus\u2014House of coded instructions"
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "Fig. 2.11",
+      "label": "Structure of a nucleus",
+      "description": "A cross-section diagram illustrating the internal structure of a eukaryotic nucleus. The nucleus is depicted as a large, central organelle, surrounded by a nuclear envelope. Inside the nucleus, the chromatin material is shown as a dense, tangled mass of thread-like structures. Within the nucleus, a distinct, circular structure labeled the nucleolus is visible. The diagram labels the nuclear envelope, chromatin, and the nucleolus.",
+      "labels": [
+        "Nucleus",
+        "Nucleolar membrane",
+        "Chromatin",
+        "Nucleolus",
+        "Nuclear envelope"
+      ]
+    }
+  ],
+  "captions": [
+    "Fig. 2.11: Structure of a nucleus"
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "reader": [
+    {
+      "question": "Read me what is on this page about the cell wall.",
+      "answer": "The plant cell wall is made up of cellulose microfibrils [page 1]. Its functions are to provide structural support and protection [page 1]. Additionally, the cell membrane is located just inside the cell wall [page 1].",
+      "citations": [
+        {
+          "page": 1
+        }
+      ],
+      "not_in_book": false
+    },
+    {
+      "question": "Describe the diagram on page 1.",
+      "answer": "The diagram on page 1 is a simplified, two-dimensional cross-section representing a typical plant cell [page 1]. The most prominent feature shown is a large, central, circular structure labeled 'Nucleus' [page 1]. The diagram also implies the cell's boundaries, which are described as the cell wall and membrane [page 1].",
+      "citations": [
+        {
+          "page": 1
+        }
+      ],
+      "not_in_book": false
+    },
+    {
+      "question": "What organelles are mentioned on the pages?",
+      "answer": "The pages mention several organelles and major cell structures, including:\n\n*   **Chloroplasts:** These are listed as an organelle found in the cytoplasm, responsible for photosynthesis [Page 1].\n*   **Mitochondria:** These are described as the \"powerhouse of the cell\" and perform cellular respiration [Page 1, Page 3].\n*   **Ribosomes:** These are the sites of protein synthesis and can be found free in the cytoplasm or attached to the endoplasmic reticulum [Page 1, Page 2].\n*   **Endoplasmic reticulum (ER):** This organelle is involved in transport [Page 1]. Specific types mentioned are:\n    *   **Rough endoplasmic reticulum (RER):** This type has ribosomes on its surface and is involved in protein processing and transport [Page 2].\n    *   **Smooth endoplasmic reticulum (SER):** This type lacks ribosomes and is involved in lipid synthesis and detoxification [Page 2].\n*   **Nucleus:** This is a prominent feature of the plant cell [Page 1].\n*   **Cell Wall:** This structure provides structural support and protection to the plant cell [Page 1].\n*   **Cell Membrane:** This structure lies just inside the cell wall and is selectively permeable, controlling what enters and exits the cell [Page 1].",
+      "citations": [
+        {
+          "page": 1
+        },
+        {
+          "page": 2
+        }
+      ],
+      "not_in_book": false
+    }
+  ],
+  "tutor": [
+    {
+      "question": "What is the cell wall made of and what does it do?",
+      "answer": "The plant cell wall is made of cellulose microfibrils [page 1]. Its functions are to provide structural support and protection [page 1].",
+      "citations": [
+        {
+          "page": 1
+        }
+      ],
+      "not_in_book": false
+    },
+    {
+      "question": "What is the structure of a mitochondrion?",
+      "answer": "A mitochondrion has a double membrane and is generally described as having an oval or bean shape [Page 3]. Its structure includes several parts:\n\n*   **Outer membrane:** This boundary is smooth and permeable to small molecules [Page 3].\n*   **Inner membrane:** This membrane is folded into structures called cristae and is the site where ATP synthesis occurs [Page 3].\n*   **Intermembrane space:** This is the area located between the two membranes [Page 3].\n*   **Matrix:** This central space, which is enclosed by the inner membrane, contains enzymes necessary for the Krebs cycle [Page 3].",
+      "citations": [
+        {
+          "page": 3
+        }
+      ],
+      "not_in_book": false
+    },
+    {
+      "question": "What is the role of ribosomes in the cell?",
+      "answer": "Ribosomes are responsible for protein synthesis [page 2]. Specifically, they translate mRNA into polypeptide chains [page 2].\n\nTheir role varies depending on their location:\n*   **Free ribosomes** produce proteins that are used within the cell [page 2].\n*   **Bound ribosomes** produce proteins that are intended for export or for use in the membrane [page 2].",
+      "citations": [
+        {
+          "page": 2
+        }
+      ],
+      "not_in_book": false
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "answer": "Plant cells and animal cells differ in several ways, particularly regarding their outer structure and flexibility:\n\n*   **Cell Wall:** Plant cells possess a rigid outer layer called the cell wall, which surrounds the cell membrane [Page 7]. This cell wall is primarily made of cellulose, a type of carbohydrate [Page 7]. In contrast, animal cells do not have this rigid cell wall [Page 6, 7].\n*   **Shape and Support:** The cell wall provides plant cells with a rigid structure, helping them maintain their shape and stay upright, which is necessary because plants are usually fixed in one place [Page 6]. Because animal cells lack a rigid cell wall, they can change shape easily [Page 7].\n*   **Response to Solutions:** When plant cells are placed in a concentrated sugar solution, they lose water due to osmosis, but their rigid cell wall maintains their original shape [Page 6]. However, animal cells lose water and shrink when placed in a concentrated sugar solution [Page 6].\n*   **Structural Comparison:** A comparison diagram illustrates that the plant cell has a rigid outer layer (the cell wall) surrounding the cell membrane, while the animal cell is shown only with a cell membrane surrounding the cytoplasm, lacking the rigid outer cell wall [Page 7]. Table 2.1 also confirms that the plant cell has a cell wall, while the bacterial cell and animal cell do not [Page 8].",
+  "citations": [
+    {
+      "page": 7
+    },
+    {
+      "page": 6
+    },
+    {
+      "page": 8
+    }
+  ],
+  "not_in_book": false,
+  "pages_used": [
+    4,
+    5,
+    6,
+    7,
+    8
+  ]
+}

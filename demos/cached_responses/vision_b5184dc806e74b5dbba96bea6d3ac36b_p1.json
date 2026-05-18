@@ -1,0 +1,26 @@
+{
+  "text": "Chapter 3: The Plant Cell\n\n3.1 Cell Wall\nThe plant cell wall is composed of cellulose microfibrils. It provides structural support and protection.\n\nThe cell membrane lies just inside the cell wall. It is selectively permeable, controlling what enters and exits.\n\nThe cytoplasm contains various organelles including:\n- Chloroplasts (photosynthesis)\n- Mitochondria (cellular respiration)\n- Ribosomes (protein synthesis)\n- Endoplasmic reticulum (transport)",
+  "headings": [
+    {
+      "level": 1,
+      "text": "Chapter 3: The Plant Cell"
+    },
+    {
+      "level": 2,
+      "text": "3.1 Cell Wall"
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "fig_3_1",
+      "label": "Plant Cell Cross-Section",
+      "description": "A simplified, schematic cross-section of a plant cell is shown within a rectangular boundary. The cell structure is defined by a thick outer layer (the cell wall) and contains a large, central, circular organelle labeled 'Nucleus'. The nucleus occupies a significant portion of the cell's interior space.",
+      "labels": [
+        "Nucleus"
+      ]
+    }
+  ],
+  "captions": [
+    "Fig. 3.1: A typical plant cell showing major organelles."
+  ]
+}

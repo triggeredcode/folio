@@ -1,0 +1,55 @@
+{
+  "text": "Without a rigid cell wall, animal cells can change shape easily. This cellular flexibility supports the overall movement and functioning of animal tissues.\n\nThe plant cell is primarily made of cellulose, a type of carbohydrate formed by many glucose units linked together. Cellulose in our diet acts as roughage, helping in digestion. Some microorganisms, like fungi and bacteria, also have a cell wall to provide protection and structural support to their cells.\n\nActivity 2.4: Let us study\n\n1. What argument would you give for the necessity of a cell wall in plants usually fixed in one place versus in animals usually moving from one place to the other?\n2. What consequences would you predict for a plant cell if its cell wall were to become as flexible as a cell membrane?\n3. Why is it important to cut the two potato pieces in roughly equal size and measure their initial weight before placing them in different liquids?\n\n2.3 The Cell Interior \u2014 A Coordinated Working System\n\nYou have learnt that most cells have three basic parts:\n\n* a selectively permeable membrane called the plasma membrane,\n* a semi-fluid, jelly-like substance called the cytoplasm, and\n* a prominent nucleus.\n\nA bacterium cell lacks a well-defined nucleus and membrane-bound organelles (organelles surrounded by their own membranes). Such cells are called prokaryotic cells (pro means primitive and karyon means",
+  "headings": [
+    {
+      "level": 2,
+      "text": "Activity 2.4: Let us study"
+    },
+    {
+      "level": 2,
+      "text": "2.3 The Cell Interior \u2014 A Coordinated Working System"
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "a",
+      "label": "Plant Cell",
+      "description": "Diagram (a) illustrates a plant cell. The cell is enclosed by a rigid outer layer called the cell wall. Inside the cell wall is the plasma membrane. The main internal components include a large central vacuole, which occupies a significant portion of the cell. The cytoplasm surrounds the nucleus and contains numerous chloroplasts, which are small, green, oval-shaped organelles. The nucleus is visible near the center-right of the cell.",
+      "labels": [
+        "Cell wall",
+        "Chloroplast",
+        "Vacuole",
+        "Cytoplasm",
+        "Nucleus",
+        "Cell membrane"
+      ]
+    },
+    {
+      "id": "b",
+      "label": "Animal Cell",
+      "description": "Diagram (b) illustrates an animal cell. The cell is contained by a plasma membrane. The internal structure shows a prominent nucleus, surrounded by cytoplasm. The cytoplasm fills the space and contains various organelles, including mitochondria, which are depicted as bean-shaped structures. The cell lacks a rigid cell wall and a large central vacuole.",
+      "labels": [
+        "Cell membrane",
+        "Nucleus",
+        "Mitochondria",
+        "Cytoplasm"
+      ]
+    },
+    {
+      "id": "c",
+      "label": "Bacterial Cell",
+      "description": "Diagram (c) illustrates a bacterial cell. This cell is enclosed by a cell wall and a plasma membrane. Key structures visible include the cytoplasm, the nucleoid region (containing the genetic material), and a flagellum extending from the cell body. The cell is depicted as rod-shaped.",
+      "labels": [
+        "Cell wall",
+        "Plasma membrane",
+        "Flagellum",
+        "Cytoplasm",
+        "Nucleoid",
+        "Ribosome"
+      ]
+    }
+  ],
+  "captions": [
+    "Fig. 2.10: (a) A typical bacterial cell, (b) a plant cell, and (c) a typical animal cell"
+  ]
+}

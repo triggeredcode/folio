@@ -1,0 +1,49 @@
+{
+  "text": "Ribosomes\u2014The protein factories\nThese are tiny structures may be present either freely in the cytoplasm or attached to the endoplasmic reticulum. Ribosomes are the sites of protein synthesis.\n\nEndoplasmic Reticulum (ER)\u2014Manufacturing factory\nThe Endoplasmic Reticulum (ER) is a large organelle that spreads like a network within the cytoplasm of the cell. The ER is continuous with the outer membrane of nuclear envelope. The ER plays a key role in the synthesis and transport of proteins, fats (lipids), and some hormones in some of the specialised cell. The structure of the ER in a cell varies depending on its function. There are two types of ER:\n\n\u2022 Rough Endoplasmic Reticulum (RER): It looks rough under an electron microscope because it has ribosomes attached to its surface, and is mainly involved in protein synthesis and protein secretion (for example, in gland cells, such as pancreatic cells).\n\n\u2022 Smooth Endoplasmic Reticulum (SER): It does not have ribosomes on its surface, and therefore, looks smooth. It is involved in the synthesis, and storage of fats and hormones (Fig. 2.13).\n\nGolgi apparatus\u2014The packaging and shipping centres\nIf you carefully look at the diagram of a cell (Fig. 2.10b and c), you will notice stacks of flattened, sac-like structures. These stacks form the Golgi apparatus (Fig. 2.13). It is functionally linked to the ER, the cell membrane and the other cell organelles. The Golgi apparatus acts like the cell's post office. It modifies, sorts, and packages proteins and/or lipids into vesicles for transport, secretion, or lysosome formation.\n\nLysosomes\u2014The clean-up system\nCells produce waste materials and damaged, worn-out organelles during their activities. How does the cell prevent these wastes from accumulating inside it?\n\nLysosomes are single membrane-bound sacs filled with enzymes, which can break down unwanted proteins, carbohydrates, fats, and even\n\nCell: The Building Block of Life\n\nThe Golgi apparatus was first observed in 1898 by an Italian scientist, Camillo Golgi, in the nerve cells of a barn owl. Using special staining techniques, he observed a thread-like network. Early microscopes could not view it clearly, therefore, many doubted its existence. However, electron microscope observations confirmed it decades later.\n\nWhen the structure was clearly seen and confirmed, it was named the 'Golgi apparatus' in his honour.",
+  "headings": [
+    {
+      "level": 2,
+      "text": "Ribosomes\u2014The protein factories"
+    },
+    {
+      "level": 2,
+      "text": "Endoplasmic Reticulum (ER)\u2014Manufacturing factory"
+    },
+    {
+      "level": 3,
+      "text": "\u2022 Rough Endoplasmic Reticulum (RER): It looks rough under an electron microscope because it has ribosomes attached to its surface, and is mainly involved in protein synthesis and protein secretion (for example, in gland cells, such as pancreatic cells)."
+    },
+    {
+      "level": 3,
+      "text": "\u2022 Smooth Endoplasmic Reticulum (SER): It does not have ribosomes on its surface, and therefore, looks smooth. It is involved in the synthesis, and storage of fats and hormones (Fig. 2.13)."
+    },
+    {
+      "level": 2,
+      "text": "Golgi apparatus\u2014The packaging and shipping centres"
+    },
+    {
+      "level": 2,
+      "text": "Lysosomes\u2014The clean-up system"
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "Fig. 2.13",
+      "label": "Cell: The Building Block of Life",
+      "description": "A detailed cross-section diagram illustrating the internal components of a cell. The overall structure is enclosed by the plasma membrane. Inside, the nucleus is visible. Attached to the nucleus is the endoplasmic reticulum (ER), which forms a complex network. The RER portion of the ER has ribosomes attached to its outer surface. The SER portion is depicted as a smooth network. Extending from the ER is the Golgi apparatus, shown as a stack of flattened, curved sacs (cisternae). Small, spherical structures called vesicles are shown budding off the Golgi apparatus and moving toward the cell periphery. Mitochondria are depicted as oval structures, and the ribosomes are shown as small dots attached to the RER.",
+      "labels": [
+        "Nucleus",
+        "Mitochondria",
+        "Endoplasmic Reticulum (RER)",
+        "Endoplasmic Reticulum (SER)",
+        "Golgi apparatus",
+        "Ribosome",
+        "Plasma membrane",
+        "Vesicles"
+      ]
+    }
+  ],
+  "captions": [
+    "Fig. 2.13: Endoplasmic reticulum and Golgi apparatus\u2014pathway for protein processing and secretion"
+  ]
+}

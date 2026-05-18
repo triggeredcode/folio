@@ -1,0 +1,14 @@
+{
+  "answer": "Ribosomes are responsible for protein synthesis [page 2]. Specifically, they translate mRNA into polypeptide chains [page 2].\n\nTheir role varies depending on their location:\n*   **Free ribosomes** produce proteins that are used within the cell [page 2].\n*   **Bound ribosomes** produce proteins that are intended for export or for use in the membrane [page 2].",
+  "citations": [
+    {
+      "page": 2
+    }
+  ],
+  "not_in_book": false,
+  "pages_used": [
+    1,
+    2,
+    3
+  ]
+}

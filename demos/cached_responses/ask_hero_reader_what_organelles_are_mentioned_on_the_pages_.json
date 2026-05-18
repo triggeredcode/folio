@@ -1,0 +1,17 @@
+{
+  "answer": "The pages mention several organelles and major cell structures, including:\n\n*   **Chloroplasts:** These are listed as an organelle found in the cytoplasm, responsible for photosynthesis [Page 1].\n*   **Mitochondria:** These are described as the \"powerhouse of the cell\" and perform cellular respiration [Page 1, Page 3].\n*   **Ribosomes:** These are the sites of protein synthesis and can be found free in the cytoplasm or attached to the endoplasmic reticulum [Page 1, Page 2].\n*   **Endoplasmic reticulum (ER):** This organelle is involved in transport [Page 1]. Specific types mentioned are:\n    *   **Rough endoplasmic reticulum (RER):** This type has ribosomes on its surface and is involved in protein processing and transport [Page 2].\n    *   **Smooth endoplasmic reticulum (SER):** This type lacks ribosomes and is involved in lipid synthesis and detoxification [Page 2].\n*   **Nucleus:** This is a prominent feature of the plant cell [Page 1].\n*   **Cell Wall:** This structure provides structural support and protection to the plant cell [Page 1].\n*   **Cell Membrane:** This structure lies just inside the cell wall and is selectively permeable, controlling what enters and exits the cell [Page 1].",
+  "citations": [
+    {
+      "page": 1
+    },
+    {
+      "page": 2
+    }
+  ],
+  "not_in_book": false,
+  "pages_used": [
+    1,
+    2,
+    3
+  ]
+}

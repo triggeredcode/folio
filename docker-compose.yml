@@ -1,0 +1,27 @@
+services:
+  folio-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - FOLIO_OLLAMA_URL=http://host.docker.internal:11434
+      - FOLIO_VISION_MODEL=gemma4:e4b
+      - FOLIO_TEXT_MODEL=gemma4:e4b
+      - FOLIO_TTS=say
+      - FOLIO_DEMO_MODE=0
+    volumes:
+      - ./media:/app/media
+      - ./demos:/app/demos
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  folio-web:
+    build: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - folio-api
+    restart: unless-stopped

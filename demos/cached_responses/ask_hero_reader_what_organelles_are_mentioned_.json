@@ -1,0 +1,16 @@
+{
+  "answer": "The organelles mentioned in the pages are:\n\n*   **Ribosomes:** These are the sites where protein synthesis occurs [Page 2].\n*   **Endoplasmic Reticulum (ER):** This structure includes the rough endoplasmic reticulum (RER), which has ribosomes on its surface and is involved in protein processing and transport, and the smooth endoplasmic reticulum (SER), which lacks ribosomes and is involved in lipid synthesis and detoxification [Page 2].\n*   **Mitochondria:** These are described as the powerhouse of the cell, where cellular respiration takes place [Page 3].\n*   **Cytoplasm:** Ribosomes can be found free in the cytoplasm [Page 2].",
+  "citations": [
+    {
+      "page": 2
+    },
+    {
+      "page": 3
+    }
+  ],
+  "not_in_book": false,
+  "pages_used": [
+    2,
+    3
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "text": "Mitochondria are the powerhouse of the cell. They perform cellular respiration, converting glucose and oxygen into ATP (adenosine triphosphate).\n\nEach mitochondrion has a double membrane:\n- Outer membrane: smooth, permeable to small molecules\n- Inner membrane: folded into cristae, site of ATP synthesis\n- Matrix: contains enzymes for the Krebs cycle\n- Intermembrane space: between the two membranes",
+  "headings": [
+    {
+      "level": 2,
+      "text": "3.3 Mitochondria"
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "fig_3_2",
+      "label": "Structure of a mitochondrion",
+      "description": "A cross-section diagram illustrating the structure of a mitochondrion. The overall shape is an oval or bean shape, enclosed by a double membrane. The outer boundary is labeled 'outer membrane'. Inside, the space between the two membranes is the 'intermembrane space'. The inner boundary is folded into structures labeled 'cristae'. The central space enclosed by the inner membrane is labeled 'matrix'.",
+      "labels": [
+        "outer membrane",
+        "inner membrane",
+        "cristae",
+        "matrix",
+        "intermembrane space"
+      ]
+    }
+  ],
+  "captions": [
+    "Fig. 3.2: Structure of a mitochondrion"
+  ]
+}

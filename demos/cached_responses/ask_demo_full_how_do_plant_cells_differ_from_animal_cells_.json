@@ -1,0 +1,25 @@
+{
+  "answer": "Plant cells and animal cells differ in several structural ways:\n\n1.  **Cell Wall:**\n    *   Plant cells possess an additional, rigid outer covering called a cell wall, which is outside the cell membrane [Page 6].\n    *   Animal cells do not have a cell wall [Page 6].\n    *   Table 2.1 confirms this difference, showing that the cell wall is present in bacterial, plant, and animal cells, but the table entry for animal cells is blank [Page 8].\n\n2.  **Shape and Flexibility:**\n    *   Because of the rigid cell wall, plant cells are box-shaped and regularly arranged [Page 6]. The cell wall helps plants maintain their shape and stay upright [Page 6].\n    *   Animal cells lack a cell wall, allowing them to change shape easily, which supports the movement and functioning of animal tissues [Page 7].\n\n3.  **Internal Components:**\n    *   The diagram illustrating a plant cell shows a large central vacuole, which occupies a significant portion of the cell [Page 7].\n    *   The diagram illustrating an animal cell shows a cell that lacks a rigid cell wall and a large central vacuole [Page 7].\n\n4.  **Structural Comparison (Table 2.1):**\n    *   The comparison table confirms that while both cell types have a cell membrane and cytoplasm, only plant cells are listed as having a cell wall [Page 8].",
+  "citations": [
+    {
+      "page": 6
+    },
+    {
+      "page": 8
+    },
+    {
+      "page": 7
+    }
+  ],
+  "not_in_book": false,
+  "pages_used": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ]
+}

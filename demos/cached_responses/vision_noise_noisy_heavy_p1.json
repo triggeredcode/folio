@@ -1,0 +1,36 @@
+{
+  "text": "Different objective lenses (e.g., 10X, 40X) to achieve better magnification and resolution under visible light. Explore different parts of a microscope (Fig. 2.2) in your school laboratory and write.\n\nEstimate the size of the onion peel cell = \n\nIf the estimated size of an onion peel cell is 200 $\\mu$m, how much does a light microscope magnify this cell? The total magnification of a microscope depends on its magnifying power of the eyepiece and the objective lens. If both the eyepiece and objective lens have the magnifying power of 10X, then the total magnification will be 100X. This means that a cell with an estimated size of 200 $\\mu$m will appear 100 times larger.\n\nThus, a microscope allows us to see very small structures clearly and is an essential tool for studying the cell structure. Over the years, scientists have improved the microscope by improving its three main features\u2014resolution (measure of clarity), contrast (the difference in brightness between various\n\n10 Exploration | Grade 9",
+  "headings": [
+    {
+      "level": 2,
+      "text": "Estimate the size of the onion peel cell ="
+    },
+    {
+      "level": 2,
+      "text": "Activity 2.1: Let us estimate the size of a cell"
+    },
+    {
+      "level": 2,
+      "text": "Unit conversion:"
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "Microscope Diagram",
+      "label": "Structure of a light microscope",
+      "description": "A labeled diagram illustrating the components of a compound light microscope. The microscope is shown with the eyepiece positioned at the top. Below the eyepiece is the body tube. The objective lens is located directly below the body tube, closest to the specimen area. The stage is the flat platform where the slide rests. Below the stage are the coarse adjustment knob and the fine adjustment knob, used for focusing. A mirror is positioned below the stage, reflecting light upwards through the specimen. Labels point to the Eyepiece, Body tube, Objective lens, Stage, Coarse adjustment knob, Fine adjustment knob, and Mirror.",
+      "labels": [
+        "Eyepiece",
+        "Body tube",
+        "Objective lens",
+        "Stage",
+        "Coarse adjustment knob",
+        "Fine adjustment knob",
+        "Mirror"
+      ]
+    }
+  ],
+  "captions": [
+    "Fig. 2.2: Structure of a light microscope"
+  ]
+}
