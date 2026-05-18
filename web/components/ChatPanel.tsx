@@ -15,6 +15,7 @@ interface ChatPanelProps {
   messages: Message[];
   loading?: boolean;
   onCitationClick?: (pageNumber: number) => void;
+  onAddPages?: () => void;
 }
 
 export default function ChatPanel({
@@ -22,6 +23,7 @@ export default function ChatPanel({
   messages,
   loading = false,
   onCitationClick,
+  onAddPages,
 }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -104,8 +106,22 @@ export default function ChatPanel({
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="px-5 py-4 flex gap-3"
+      <form onSubmit={handleSubmit} className="px-4 py-3 flex items-center gap-2"
         style={{ borderTop: "1px solid var(--border)" }}>
+        {onAddPages && (
+          <button
+            type="button"
+            onClick={onAddPages}
+            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors"
+            style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
+            title="Add more pages"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </button>
+        )}
         <input
           type="text"
           value={input}
@@ -119,7 +135,7 @@ export default function ChatPanel({
         <button
           type="submit"
           disabled={loading || !input.trim()}
-          className="text-sm font-medium px-4 py-2 rounded-lg transition-all disabled:opacity-20"
+          className="text-sm font-medium px-3 py-2 rounded-lg transition-all disabled:opacity-20"
           style={{ color: "var(--accent)" }}
         >
           Send
