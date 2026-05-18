@@ -33,6 +33,7 @@ function TutorContent() {
   const [loading, setLoading] = useState(false);
   const [ingesting, setIngesting] = useState(false);
   const [ingestStatus, setIngestStatus] = useState<string | null>(null);
+  const [mode, setMode] = useState<"capture" | "chat">("capture");
 
   const handleCapture = useCallback(
     (blob: Blob) => {
@@ -104,85 +105,131 @@ function TutorContent() {
 
   return (
     <main className="min-h-screen flex flex-col" style={{ background: "var(--bg)" }}>
-      {/* Header */}
-      <header className="px-4 py-3 flex items-center justify-between"
+      {/* Minimal header */}
+      <header className="px-5 py-3 flex items-center justify-between"
         style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex items-center gap-3">
-          <a href="/" className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-            Folio
+          <a href="/" className="text-lg font-semibold tracking-tight" style={{ color: "var(--text-primary)" }}>
+            folio
           </a>
-          <span className="text-xs px-2 py-0.5 rounded-md font-medium"
+          <span className="text-[11px] px-1.5 py-0.5 rounded font-medium uppercase tracking-wider"
             style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
-            Tutor
+            tutor
           </span>
         </div>
         <div className="flex items-center gap-4">
           {pages.length > 0 && (
-            <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-              {pages.length} page{pages.length !== 1 ? "s" : ""} loaded
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+              {pages.length} page{pages.length !== 1 ? "s" : ""}
             </span>
           )}
-          <a href="/" className="text-xs transition-colors hover:opacity-80"
-            style={{ color: "var(--text-muted)" }}>
-            Switch mode
+          {mode === "chat" && (
+            <button
+              onClick={() => setMode("capture")}
+              className="text-xs px-2.5 py-1 rounded-md transition-colors"
+              style={{ color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+            >
+              + Add pages
+            </button>
+          )}
+          <a href="/" className="text-xs" style={{ color: "var(--text-muted)" }}>
+            Exit
           </a>
         </div>
       </header>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Page strip + controls */}
-        <div className="px-3 py-2 flex items-center gap-2"
-          style={{ borderBottom: "1px solid var(--border)" }}>
-          <PageStrip pages={pages} activePage={activePage} onPageClick={setActivePage} />
-          <CameraCapture onCapture={handleCapture} disabled={ingesting} compact />
-        </div>
-
-        {/* Ingest status */}
+        {/* Ingest status bar */}
         {ingestStatus && (
-          <div className="px-4 py-2" style={{ borderBottom: "1px solid var(--border)" }}>
+          <div className="px-5 py-2" style={{ background: "var(--bg-elevated)" }}>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
-              <span className="text-xs font-medium" style={{ color: "var(--accent)" }}>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
+              <span className="text-xs" style={{ color: "var(--accent)" }}>
                 {ingestStatus}
               </span>
             </div>
           </div>
         )}
 
-        {/* Main content */}
-        <div className="flex-1 overflow-hidden">
-          {pages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full p-8 gap-6 overflow-y-auto">
-              <div className="text-center max-w-sm space-y-2">
-                <h2 className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>
-                  Scan your textbook pages
-                </h2>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                  Use the camera below or upload a PDF. Then ask questions — answers come only from your book.
-                </p>
+        {/* CAPTURE MODE */}
+        {mode === "capture" ? (
+          <div className="flex-1 flex flex-col items-center overflow-y-auto">
+            {/* Page previews strip */}
+            {pages.length > 0 && (
+              <div className="w-full px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
+                <div className="flex items-center gap-3 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+                  {pages.map((page) => (
+                    <div key={page.page_id}
+                      className="flex-shrink-0 rounded-lg p-3 min-w-[160px]"
+                      style={{
+                        background: "var(--bg-elevated)",
+                        border: activePage === page.page_number
+                          ? "1px solid var(--accent)"
+                          : "1px solid var(--border)",
+                      }}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                          Page {page.page_number}
+                        </span>
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--success)" }} />
+                      </div>
+                      <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                        {page.headings[0]?.text || page.text.slice(0, 60) + "..."}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
+            )}
 
-              {/* Full camera interface when no pages loaded */}
-              <div className="w-full max-w-lg">
-                <CameraCapture onCapture={handleCapture} disabled={ingesting} />
-              </div>
+            {/* Camera + upload area */}
+            <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6 max-w-lg mx-auto w-full">
+              {pages.length === 0 ? (
+                <div className="text-center space-y-1">
+                  <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+                    Scan your textbook
+                  </h2>
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    Capture pages one by one, then ask questions
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center space-y-1">
+                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                    {pages.length} page{pages.length !== 1 ? "s" : ""} captured. Add more or start chatting.
+                  </p>
+                </div>
+              )}
 
-              <div className="w-full max-w-sm">
-                <PdfUpload
-                  onUpload={(file) => handleCapture(file)}
-                  disabled={ingesting}
-                />
-              </div>
+              <CameraCapture onCapture={handleCapture} disabled={ingesting} />
+
+              {pages.length === 0 && (
+                <div className="w-full">
+                  <PdfUpload onUpload={(file) => handleCapture(file)} disabled={ingesting} />
+                </div>
+              )}
+
+              {/* Start Chat button — only when pages exist */}
+              {pages.length > 0 && (
+                <button
+                  onClick={() => setMode("chat")}
+                  className="w-full max-w-xs py-3.5 rounded-xl text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98]"
+                  style={{ background: "var(--accent)", color: "white" }}
+                >
+                  Start asking questions ({pages.length} page{pages.length !== 1 ? "s" : ""})
+                </button>
+              )}
             </div>
-          ) : (
-            <ChatPanel
-              messages={messages}
-              onSend={handleAsk}
-              loading={loading}
-              onCitationClick={handleCitationClick}
-            />
-          )}
-        </div>
+          </div>
+        ) : (
+          /* CHAT MODE */
+          <ChatPanel
+            messages={messages}
+            onSend={handleAsk}
+            loading={loading}
+            onCitationClick={handleCitationClick}
+          />
+        )}
       </div>
     </main>
   );
