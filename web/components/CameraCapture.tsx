@@ -22,6 +22,14 @@ export default function CameraCapture({
   const streamRef = useRef<MediaStream | null>(null);
 
   const startCamera = useCallback(async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setError(
+        window.location.protocol === "http:"
+          ? "Camera requires HTTPS. Open this page via the HTTPS link to use the camera, or use the Upload button."
+          : "Camera API not available on this device. Use the Upload button instead."
+      );
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -33,8 +41,15 @@ export default function CameraCapture({
       streamRef.current = stream;
       setStreaming(true);
       setError(null);
-    } catch {
-      setError("Camera access denied. Please allow camera permissions.");
+    } catch (err) {
+      const name = err instanceof DOMException ? err.name : "";
+      if (name === "NotAllowedError") {
+        setError("Camera permission denied. Check your browser settings and tap Retry.");
+      } else if (name === "NotFoundError") {
+        setError("No camera found on this device. Use the Upload button instead.");
+      } else {
+        setError(`Camera error: ${name || "unknown"}. Use Upload instead.`);
+      }
     }
   }, []);
 
@@ -104,28 +119,29 @@ export default function CameraCapture({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center gap-3 p-6 rounded-2xl"
+      <div className="flex flex-col items-center gap-3 p-6 rounded-2xl w-full"
         style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-        <div className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: "#ef444420" }}>
-          <span className="text-lg">⚠️</span>
-        </div>
         <p className="text-sm text-center" style={{ color: "var(--text-secondary)" }}>
           {error}
         </p>
-        <div className="flex gap-2">
-          <button
-            onClick={startCamera}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{ background: "var(--accent)", color: "white" }}
-          >
-            Retry
-          </button>
-          <label className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
+        <div className="flex gap-2 flex-wrap justify-center">
+          <label className="px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors"
+            style={{ background: "var(--accent)", color: "white" }}>
+            Take Photo
+            <input type="file" accept="image/*" capture="environment" onChange={handleFileUpload} className="hidden" />
+          </label>
+          <label className="px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors"
             style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
-            Upload
+            Upload File
             <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="hidden" />
           </label>
+          <button
+            onClick={() => { setError(null); startCamera(); }}
+            className="px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Retry Camera
+          </button>
         </div>
       </div>
     );
