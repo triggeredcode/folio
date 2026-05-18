@@ -28,15 +28,19 @@ export default function Home() {
     getNetworkUrl();
   }, []);
 
+  const [error, setError] = useState<string | null>(null);
+
   async function handleModeSelect(mode: "reader" | "tutor") {
     setLoading(true);
+    setError(null);
     try {
       const session = await createSession(mode);
       localStorage.setItem("folio_session_id", session.session_id);
       localStorage.setItem("folio_mode", mode);
       router.push(`/${mode}?session=${session.session_id}`);
-    } catch {
-      alert("Cannot connect to the backend. Is the server running?");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      setError(`Connection failed: ${msg}`);
     } finally {
       setLoading(false);
     }
@@ -51,7 +55,7 @@ export default function Home() {
         <div className="flex-1 max-w-xl space-y-10">
           <header className="space-y-6">
             <h1 className="font-bold tracking-tighter"
-              style={{ color: "var(--text-primary)", fontSize: "clamp(5rem, 12vw, 10rem)", lineHeight: "0.9" }}>
+              style={{ color: "var(--text-primary)", fontSize: "clamp(6rem, 15vw, 14rem)", lineHeight: "0.85", letterSpacing: "-0.04em" }}>
               folio
             </h1>
             <p className="text-xl leading-relaxed"
@@ -64,6 +68,14 @@ export default function Home() {
               No cloud. No hallucination. Just your book, understood.
             </p>
           </header>
+
+          {/* Error display */}
+          {error && (
+            <div className="px-4 py-3 rounded-xl text-sm text-left animate-fade-in"
+              style={{ background: "#ef444415", border: "1px solid #ef444430", color: "#fca5a5" }}>
+              {error}
+            </div>
+          )}
 
           {/* Mode selection */}
           <div className="space-y-3">
