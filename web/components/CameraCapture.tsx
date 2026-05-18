@@ -30,12 +30,9 @@ export default function CameraCapture({
           height: { ideal: 1080 },
         },
       });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setStreaming(true);
-        setError(null);
-      }
+      streamRef.current = stream;
+      setStreaming(true);
+      setError(null);
     } catch {
       setError("Camera access denied. Please allow camera permissions.");
     }
@@ -90,6 +87,12 @@ export default function CameraCapture({
     },
     [onCapture]
   );
+
+  useEffect(() => {
+    if (streaming && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [streaming]);
 
   useEffect(() => {
     return () => {

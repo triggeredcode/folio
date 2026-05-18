@@ -23,12 +23,17 @@ export default function ConnectionStatus() {
 
   return (
     <div
-      className={`text-xs px-2 py-1 rounded-full ${
-        status === "checking"
-          ? "bg-yellow-900/50 text-yellow-300"
-          : "bg-red-900/50 text-red-300"
-      }`}
+      className="fixed top-3 right-3 text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 z-50"
+      style={{
+        background: status === "checking" ? "#f59e0b20" : "#ef444420",
+        color: status === "checking" ? "var(--warning)" : "var(--danger)",
+        border: `1px solid ${status === "checking" ? "#f59e0b40" : "#ef444440"}`,
+      }}
     >
+      <div
+        className="w-2 h-2 rounded-full animate-pulse"
+        style={{ background: status === "checking" ? "var(--warning)" : "var(--danger)" }}
+      />
       {status === "checking" ? "Connecting..." : "Backend offline"}
     </div>
   );
