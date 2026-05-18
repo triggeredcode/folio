@@ -48,3 +48,12 @@ class TestHealthAndSession:
             "/api/ask", json={"session_id": sid, "question": "hello"}
         )
         assert resp2.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_network_info(self, client):
+        resp = await client.get("/api/network-info")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "ip" in data
+        assert "port" in data
+        assert isinstance(data["port"], int)
