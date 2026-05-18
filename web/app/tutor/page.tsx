@@ -152,23 +152,21 @@ function TutorContent() {
         {/* Main content */}
         <div className="flex-1 overflow-hidden">
           {pages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full p-8 gap-6">
-              <div className="text-center max-w-sm space-y-3">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-                    style={{ color: "var(--text-muted)" }}>
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                  </svg>
-                </div>
+            <div className="flex flex-col items-center justify-center h-full p-8 gap-6 overflow-y-auto">
+              <div className="text-center max-w-sm space-y-2">
                 <h2 className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>
-                  Add pages to get started
+                  Scan your textbook pages
                 </h2>
                 <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                  Scan textbook pages with the camera or upload a PDF. Then ask questions — answers come only from your book.
+                  Use the camera below or upload a PDF. Then ask questions — answers come only from your book.
                 </p>
               </div>
+
+              {/* Full camera interface when no pages loaded */}
+              <div className="w-full max-w-lg">
+                <CameraCapture onCapture={handleCapture} disabled={ingesting} />
+              </div>
+
               <div className="w-full max-w-sm">
                 <PdfUpload
                   onUpload={(file) => handleCapture(file)}
