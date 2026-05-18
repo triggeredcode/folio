@@ -65,7 +65,10 @@ export function ingestPageSSE(
     body: formData,
     signal: controller.signal,
   }).then(async (res) => {
-    if (!res.ok || !res.body) return;
+    if (!res.ok || !res.body) {
+      onEvent("error", JSON.stringify({ message: `Upload failed: ${res.status}` }));
+      return;
+    }
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
@@ -85,6 +88,10 @@ export function ingestPageSSE(
           onEvent(currentEvent, line.slice(5).trim());
         }
       }
+    }
+  }).catch(err => {
+    if (err.name !== "AbortError") {
+      onEvent("error", JSON.stringify({ message: err.message || "Network error" }));
     }
   });
 
@@ -110,7 +117,10 @@ export function ingestPdfSSE(
     body: formData,
     signal: controller.signal,
   }).then(async (res) => {
-    if (!res.ok || !res.body) return;
+    if (!res.ok || !res.body) {
+      onEvent("error", JSON.stringify({ message: `PDF upload failed: ${res.status}` }));
+      return;
+    }
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
@@ -131,6 +141,10 @@ export function ingestPdfSSE(
         }
       }
     }
+  }).catch(err => {
+    if (err.name !== "AbortError") {
+      onEvent("error", JSON.stringify({ message: err.message || "Network error" }));
+    }
   });
 
   return controller;
@@ -149,7 +163,10 @@ export function askQuestionSSE(
     body: JSON.stringify({ session_id: sessionId, question }),
     signal: controller.signal,
   }).then(async (res) => {
-    if (!res.ok || !res.body) return;
+    if (!res.ok || !res.body) {
+      onEvent("error", JSON.stringify({ message: `Question failed: ${res.status}` }));
+      return;
+    }
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
@@ -169,6 +186,10 @@ export function askQuestionSSE(
           onEvent(currentEvent, line.slice(5).trim());
         }
       }
+    }
+  }).catch(err => {
+    if (err.name !== "AbortError") {
+      onEvent("error", JSON.stringify({ message: err.message || "Network error" }));
     }
   });
 

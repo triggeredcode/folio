@@ -139,6 +139,10 @@ function TutorContent() {
             setPages(prev => [...prev, page]);
           } else if (event === "pdf_done") {
             setPendingPages(prev => prev.filter(p => p.id !== pendingId));
+          } else if (event === "error") {
+            setPendingPages(prev => prev.map(p =>
+              p.id === pendingId ? { ...p, status: "error" as const, error: JSON.parse(data).message } : p
+            ));
           }
         });
         return;
@@ -174,6 +178,10 @@ function TutorContent() {
           setActivePage(page.page_number);
           setPendingPages(prev => prev.filter(p => p.id !== pendingId));
           if (previewUrl) URL.revokeObjectURL(previewUrl);
+        } else if (event === "error") {
+          setPendingPages(prev => prev.map(p =>
+            p.id === pendingId ? { ...p, status: "error" as const, error: JSON.parse(data).message } : p
+          ));
         }
       });
     },
@@ -196,6 +204,14 @@ function TutorContent() {
             content: result.answer,
             citations: result.citations,
             notInBook: result.not_in_book,
+          }]);
+          setLoading(false);
+        } else if (event === "error") {
+          const { message } = JSON.parse(data);
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: `Something went wrong: ${message}. Please try again.`,
           }]);
           setLoading(false);
         }
@@ -328,10 +344,15 @@ function TutorContent() {
             {pendingPages.map(pp => (
               <div key={pp.id}
                 className="flex-shrink-0 rounded-lg overflow-hidden"
-                style={{ width: "72px", border: "2px solid var(--border)" }}>
+                style={{
+                  width: "72px",
+                  border: pp.status === "error" ? "2px solid #ef4444" : "2px solid var(--border)",
+                }}>
                 <div className="h-12 flex items-center justify-center relative"
                   style={{ background: "var(--bg-surface)" }}>
-                  {pp.previewUrl ? (
+                  {pp.status === "error" ? (
+                    <span className="text-xs" style={{ color: "#ef4444" }}>!</span>
+                  ) : pp.previewUrl ? (
                     <>
                       <img src={pp.previewUrl} alt="" className="w-full h-full object-cover opacity-50" />
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -345,8 +366,8 @@ function TutorContent() {
                   )}
                 </div>
                 <div className="px-1.5 py-1" style={{ background: "var(--bg-elevated)" }}>
-                  <p className="text-[9px]" style={{ color: "var(--accent)" }}>
-                    {pp.status === "uploading" ? "Uploading..." : "Processing..."}
+                  <p className="text-[9px]" style={{ color: pp.status === "error" ? "#ef4444" : "var(--accent)" }}>
+                    {pp.status === "error" ? "Failed" : pp.status === "uploading" ? "Uploading..." : "Processing..."}
                   </p>
                 </div>
               </div>
