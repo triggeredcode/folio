@@ -142,31 +142,34 @@ function TutorContent() {
   }, []);
 
   const topicsFetchedRef = useRef(false);
+  const lastTopicsKeyRef = useRef("");
 
   useEffect(() => {
-    topicsFetchedRef.current = false;
-  }, [selectedPageNums]);
+    const key = mode === "select"
+      ? `select:${Array.from(selectedPageNums).sort().join(",")}`
+      : mode === "chat"
+      ? `chat:${pages.map(p => p.page_number).sort().join(",")}`
+      : "";
 
-  useEffect(() => {
-    if (mode === "select" && selectedPageNums.size > 0 && sessionId) {
-      let cancelled = false;
-      setTopicsLoading(true);
-      getTopics(sessionId, Array.from(selectedPageNums))
-        .then(data => { if (!cancelled) { setTopicsData(data); topicsFetchedRef.current = true; } })
-        .catch(() => {})
-        .finally(() => { if (!cancelled) setTopicsLoading(false); });
-      return () => { cancelled = true; };
-    }
+    if (!key || !sessionId) return;
+    if (key === lastTopicsKeyRef.current) return;
 
-    if (mode === "chat" && !topicsFetchedRef.current && pages.length > 0 && sessionId) {
-      let cancelled = false;
-      setTopicsLoading(true);
-      getTopics(sessionId, pages.map(p => p.page_number))
-        .then(data => { if (!cancelled) { setTopicsData(data); topicsFetchedRef.current = true; } })
-        .catch(() => {})
-        .finally(() => { if (!cancelled) setTopicsLoading(false); });
-      return () => { cancelled = true; };
-    }
+    let cancelled = false;
+    setTopicsLoading(true);
+    const pageNums = mode === "select"
+      ? Array.from(selectedPageNums)
+      : pages.map(p => p.page_number);
+
+    getTopics(sessionId, pageNums)
+      .then(data => {
+        if (!cancelled) {
+          setTopicsData(data);
+          lastTopicsKeyRef.current = key;
+        }
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setTopicsLoading(false); });
+    return () => { cancelled = true; };
   }, [mode, selectedPageNums, sessionId, pages.length]);
 
   const handleCapture = useCallback(
