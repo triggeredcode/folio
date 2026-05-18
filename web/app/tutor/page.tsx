@@ -18,7 +18,7 @@ interface Message {
 
 export default function TutorPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-950" />}>
+    <Suspense fallback={<div className="min-h-screen" style={{ background: "var(--bg)" }} />}>
       <TutorContent />
     </Suspense>
   );
@@ -103,41 +103,72 @@ function TutorContent() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white flex flex-col">
-      <header className="border-b border-gray-800 px-4 py-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold">Folio</h1>
-          <span className="text-xs text-blue-400">Tutor Mode</span>
-        </div>
+    <main className="min-h-screen flex flex-col" style={{ background: "var(--bg)" }}>
+      {/* Header */}
+      <header className="px-4 py-3 flex items-center justify-between"
+        style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500">{pages.length} pages</span>
-          <a href="/" className="text-sm text-gray-500 hover:text-gray-300">
+          <a href="/" className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+            Folio
+          </a>
+          <span className="text-xs px-2 py-0.5 rounded-md font-medium"
+            style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+            Tutor
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          {pages.length > 0 && (
+            <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+              {pages.length} page{pages.length !== 1 ? "s" : ""} loaded
+            </span>
+          )}
+          <a href="/" className="text-xs transition-colors hover:opacity-80"
+            style={{ color: "var(--text-muted)" }}>
             Switch mode
           </a>
         </div>
       </header>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top: Page strip + capture */}
-        <div className="border-b border-gray-800 px-3">
-          <div className="flex items-center gap-2">
-            <PageStrip pages={pages} activePage={activePage} onPageClick={setActivePage} />
-            <CameraCapture onCapture={handleCapture} disabled={ingesting} compact />
-          </div>
-          {ingestStatus && (
-            <p className="text-xs text-blue-400 pb-2 animate-pulse">{ingestStatus}</p>
-          )}
+        {/* Page strip + controls */}
+        <div className="px-3 py-2 flex items-center gap-2"
+          style={{ borderBottom: "1px solid var(--border)" }}>
+          <PageStrip pages={pages} activePage={activePage} onPageClick={setActivePage} />
+          <CameraCapture onCapture={handleCapture} disabled={ingesting} compact />
         </div>
 
-        {/* Bottom: Chat or upload prompt */}
+        {/* Ingest status */}
+        {ingestStatus && (
+          <div className="px-4 py-2" style={{ borderBottom: "1px solid var(--border)" }}>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
+              <span className="text-xs font-medium" style={{ color: "var(--accent)" }}>
+                {ingestStatus}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Main content */}
         <div className="flex-1 overflow-hidden">
           {pages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center p-6 gap-4">
-              <p className="text-xl text-gray-400">Capture some pages first</p>
-              <p className="text-sm text-gray-600 max-w-sm">
-                Use the camera to scan textbook pages, or upload a PDF. Then ask questions —
-                answers come only from your book.
-              </p>
+            <div className="flex flex-col items-center justify-center h-full p-8 gap-6">
+              <div className="text-center max-w-sm space-y-3">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
+                    style={{ color: "var(--text-muted)" }}>
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  </svg>
+                </div>
+                <h2 className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>
+                  Add pages to get started
+                </h2>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                  Scan textbook pages with the camera or upload a PDF. Then ask questions — answers come only from your book.
+                </p>
+              </div>
               <div className="w-full max-w-sm">
                 <PdfUpload
                   onUpload={(file) => handleCapture(file)}

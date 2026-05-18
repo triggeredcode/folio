@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { AskResponse } from "@/lib/api";
 
 interface Message {
   id: string;
@@ -41,39 +40,69 @@ export default function ChatPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-3">
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && (
-          <div className="text-center text-gray-500 py-8">
-            <p className="text-lg mb-2">Ask about what you&apos;ve captured</p>
-            <p className="text-sm">
-              Questions are answered only from the pages in your session.
+          <div className="flex flex-col items-center justify-center h-full text-center py-12">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+              style={{ background: "var(--accent-soft)" }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                style={{ color: "var(--accent)" }}>
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <p className="text-lg font-medium mb-1" style={{ color: "var(--text-primary)" }}>
+              Ask about your pages
+            </p>
+            <p className="text-sm max-w-xs" style={{ color: "var(--text-muted)" }}>
+              Questions are answered only from the pages you&apos;ve captured. Try asking about concepts, diagrams, or definitions.
             </p>
           </div>
         )}
+
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
           >
             <div
-              className={`max-w-[85%] rounded-2xl px-4 py-2 ${
-                msg.role === "user"
-                  ? "bg-blue-600 text-white"
+              className="max-w-[85%] rounded-2xl px-4 py-3"
+              style={{
+                background: msg.role === "user"
+                  ? "var(--accent)"
                   : msg.notInBook
-                  ? "bg-amber-900/50 border border-amber-600/50 text-amber-100"
-                  : "bg-gray-800 text-gray-100"
-              }`}
+                  ? "#f59e0b15"
+                  : "var(--bg-surface)",
+                border: msg.role === "user"
+                  ? "none"
+                  : msg.notInBook
+                  ? "1px solid #f59e0b40"
+                  : "1px solid var(--border)",
+                color: msg.role === "user" ? "white" : "var(--text-primary)",
+              }}
             >
-              <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                {renderWithCitations(msg.content, onCitationClick)}
+              {msg.notInBook && (
+                <div className="flex items-center gap-1.5 mb-2 text-xs font-medium"
+                  style={{ color: "var(--warning)" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  Not found in your pages
+                </div>
+              )}
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {renderWithCitations(msg.content, msg.role === "user" ? undefined : onCitationClick)}
               </p>
               {msg.citations && msg.citations.length > 0 && (
-                <div className="flex gap-1.5 mt-2 flex-wrap">
+                <div className="flex gap-1.5 mt-2.5 flex-wrap">
                   {msg.citations.map((c) => (
                     <button
                       key={c.page}
                       onClick={() => onCitationClick?.(c.page)}
-                      className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full hover:bg-blue-500/40"
+                      className="text-xs px-2 py-0.5 rounded-md font-medium transition-colors hover:opacity-80"
+                      style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
                     >
                       Page {c.page}
                     </button>
@@ -83,13 +112,15 @@ export default function ChatPanel({
             </div>
           </div>
         ))}
+
         {loading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-800 rounded-2xl px-4 py-3">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
-                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.15s]" />
-                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.3s]" />
+          <div className="flex justify-start animate-fade-in">
+            <div className="rounded-2xl px-5 py-4"
+              style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+              <div className="flex gap-1.5">
+                <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: "var(--text-muted)" }} />
+                <span className="w-2 h-2 rounded-full animate-bounce [animation-delay:0.15s]" style={{ background: "var(--text-muted)" }} />
+                <span className="w-2 h-2 rounded-full animate-bounce [animation-delay:0.3s]" style={{ background: "var(--text-muted)" }} />
               </div>
             </div>
           </div>
@@ -97,19 +128,33 @@ export default function ChatPanel({
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="border-t border-gray-800 p-3 flex gap-2">
+      {/* Input area */}
+      <form onSubmit={handleSubmit} className="p-3 flex gap-2"
+        style={{ borderTop: "1px solid var(--border)" }}>
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about the captured pages..."
           disabled={loading}
-          className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+          className="flex-1 rounded-xl px-4 py-3 text-sm placeholder:opacity-50 focus:outline-none disabled:opacity-50"
+          style={{
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border)",
+            color: "var(--text-primary)",
+          }}
+          onFocus={(e) => {
+            (e.target as HTMLInputElement).style.borderColor = "var(--border-focus)";
+          }}
+          onBlur={(e) => {
+            (e.target as HTMLInputElement).style.borderColor = "var(--border)";
+          }}
         />
         <button
           type="submit"
           disabled={loading || !input.trim()}
-          className="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600"
+          className="px-5 py-3 rounded-xl text-sm font-medium transition-all disabled:opacity-40 hover:opacity-90 active:scale-95"
+          style={{ background: "var(--accent)", color: "white" }}
         >
           Ask
         </button>
@@ -125,13 +170,14 @@ function renderWithCitations(
   const parts = text.split(/(\[page\s+\d+\])/gi);
   return parts.map((part, i) => {
     const match = part.match(/\[page\s+(\d+)\]/i);
-    if (match) {
+    if (match && onCitationClick) {
       const pageNum = parseInt(match[1]);
       return (
         <button
           key={i}
-          onClick={() => onCitationClick?.(pageNum)}
-          className="inline-flex items-center text-xs bg-blue-500/30 text-blue-300 px-1.5 py-0.5 rounded mx-0.5 hover:bg-blue-500/50"
+          onClick={() => onCitationClick(pageNum)}
+          className="inline-flex items-center text-xs px-1.5 py-0.5 rounded mx-0.5 font-medium transition-colors hover:opacity-80"
+          style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
         >
           p{pageNum}
         </button>

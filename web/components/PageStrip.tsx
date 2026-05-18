@@ -10,16 +10,11 @@ interface PageStripProps {
 }
 
 export default function PageStrip({ pages, activePage, onPageClick, thumbnails }: PageStripProps) {
-  if (pages.length === 0) {
-    return (
-      <div className="flex items-center justify-center py-3 text-gray-500 text-sm">
-        No pages captured yet
-      </div>
-    );
-  }
+  if (pages.length === 0) return null;
 
   return (
-    <div className="flex gap-2 overflow-x-auto py-2 px-1 scrollbar-thin flex-1">
+    <div className="flex gap-2 overflow-x-auto py-2 px-1 flex-1"
+      style={{ scrollbarWidth: "none" }}>
       {pages.map((page) => {
         const thumb = thumbnails?.get(page.page_number);
         const isActive = activePage === page.page_number;
@@ -28,29 +23,39 @@ export default function PageStrip({ pages, activePage, onPageClick, thumbnails }
           <button
             key={page.page_id}
             onClick={() => onPageClick(page.page_number)}
-            className={`flex-shrink-0 rounded-lg border-2 transition-all overflow-hidden ${
-              isActive
-                ? "border-blue-500 ring-2 ring-blue-500/30"
-                : "border-gray-700 hover:border-gray-500"
-            }`}
+            className="flex-shrink-0 rounded-lg overflow-hidden transition-all duration-150"
+            style={{
+              border: isActive ? "2px solid var(--accent)" : "2px solid var(--border)",
+              boxShadow: isActive ? "0 0 0 3px var(--accent-soft)" : "none",
+              transform: isActive ? "scale(1.05)" : "scale(1)",
+            }}
             title={page.headings[0]?.text || `Page ${page.page_number}`}
           >
             {thumb ? (
-              <div className="w-14 h-18 relative">
+              <div className="relative w-14 h-[72px]">
                 <img
                   src={thumb}
                   alt={`Page ${page.page_number}`}
-                  className="w-14 h-18 object-cover"
+                  className="w-14 h-[72px] object-cover"
                 />
-                <span className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-[10px] text-center py-0.5 font-mono">
-                  p{page.page_number}
+                <span className="absolute bottom-0 left-0 right-0 text-[10px] text-center py-0.5 font-medium"
+                  style={{ background: "rgba(0,0,0,0.75)", color: "var(--text-primary)" }}>
+                  {page.page_number}
                 </span>
               </div>
             ) : (
-              <div className="w-14 h-18 bg-gray-800 flex flex-col items-center justify-center">
-                <span className="text-lg">📄</span>
-                <span className="text-[10px] text-gray-400 font-mono">
-                  p{page.page_number}
+              <div className="w-14 h-[72px] flex flex-col items-center justify-center gap-0.5"
+                style={{ background: "var(--bg-surface)" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.5"
+                  style={{ color: "var(--text-muted)" }}>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
+                  {page.page_number}
                 </span>
               </div>
             )}

@@ -18,12 +18,17 @@ export default function CameraCapture({
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastCapture, setLastCapture] = useState<string | null>(null);
+  const [flashActive, setFlashActive] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
 
   const startCamera = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -31,7 +36,7 @@ export default function CameraCapture({
         setStreaming(true);
         setError(null);
       }
-    } catch (err) {
+    } catch {
       setError("Camera access denied. Please allow camera permissions.");
     }
   }, []);
@@ -55,6 +60,10 @@ export default function CameraCapture({
     if (!ctx) return;
 
     ctx.drawImage(video, 0, 0);
+
+    // Flash effect
+    setFlashActive(true);
+    setTimeout(() => setFlashActive(false), 200);
 
     const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
     setLastCapture(dataUrl);
@@ -92,153 +101,229 @@ export default function CameraCapture({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center gap-3 p-4">
-        <p className="text-red-400 text-sm text-center">{error}</p>
-        <button
-          onClick={startCamera}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-        >
-          Retry Camera
-        </button>
-        <label className="px-4 py-2 bg-gray-700 text-white rounded-lg cursor-pointer hover:bg-gray-600 text-sm">
-          Upload Image
-          <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="hidden" />
-        </label>
+      <div className="flex flex-col items-center gap-3 p-6 rounded-2xl"
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center"
+          style={{ background: "#ef444420" }}>
+          <span className="text-lg">⚠️</span>
+        </div>
+        <p className="text-sm text-center" style={{ color: "var(--text-secondary)" }}>
+          {error}
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={startCamera}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            style={{ background: "var(--accent)", color: "white" }}
+          >
+            Retry
+          </button>
+          <label className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
+            style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
+            Upload
+            <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="hidden" />
+          </label>
+        </div>
       </div>
     );
   }
 
+  // Compact mode for tutor page header
   if (compact) {
     return (
       <div className="flex items-center gap-2">
         <canvas ref={canvasRef} className="hidden" />
         {!streaming ? (
-          <button
-            onClick={startCamera}
-            disabled={disabled}
-            className="w-12 h-12 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center text-xl shadow-lg"
-            title="Open camera"
-          >
-            📷
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={startCamera}
+              disabled={disabled}
+              className="h-9 px-3 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all disabled:opacity-40"
+              style={{ background: "var(--accent)", color: "white" }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              Scan
+            </button>
+            <label className="h-9 px-3 rounded-lg text-sm font-medium flex items-center gap-1.5 cursor-pointer transition-all"
+              style={{ background: "var(--bg-surface)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              File
+              <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="hidden" />
+            </label>
+          </div>
         ) : (
           <div className="flex items-center gap-2">
-            <div className="relative">
+            <div className="relative rounded-lg overflow-hidden" style={{ border: "2px solid var(--accent)" }}>
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 muted
-                className="w-32 h-24 rounded-lg bg-black object-cover"
+                className="w-36 h-24 bg-black object-cover"
               />
-              <div className="absolute inset-0 border-2 border-blue-400/50 rounded-lg pointer-events-none" />
+              {flashActive && (
+                <div className="absolute inset-0 bg-white/80 transition-opacity" />
+              )}
             </div>
             <button
               onClick={capture}
               disabled={disabled}
-              className="w-12 h-12 rounded-full bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 flex items-center justify-center shadow-lg ring-2 ring-red-400/50 text-lg"
-              title="Capture page"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all active:scale-90 disabled:opacity-40"
+              style={{ background: "#ef4444" }}
             >
-              📸
+              <div className="w-5 h-5 rounded-full bg-white" />
             </button>
             <button
               onClick={stopCamera}
-              className="w-8 h-8 rounded-full bg-gray-600 text-white hover:bg-gray-500 flex items-center justify-center text-sm"
-              title="Close camera"
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+              style={{ background: "var(--bg-surface)", color: "var(--text-muted)" }}
             >
               ✕
             </button>
           </div>
         )}
-        <label className="w-10 h-10 rounded-full bg-gray-700 text-white hover:bg-gray-600 flex items-center justify-center cursor-pointer text-sm" title="Upload file">
-          📁
-          <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="hidden" />
-        </label>
       </div>
     );
   }
 
+  // Full mode: big camera preview
   return (
-    <div className="flex flex-col items-center gap-4 p-4 w-full">
+    <div className="flex flex-col items-center gap-5 w-full">
       <canvas ref={canvasRef} className="hidden" />
 
       {!streaming ? (
-        <div className="flex flex-col items-center gap-4 w-full">
+        <div className="flex flex-col items-center gap-5 w-full">
+          {/* Show last capture preview */}
           {lastCapture && (
-            <div className="relative w-full max-w-md">
+            <div className="relative w-full max-w-md animate-fade-in">
               <img
                 src={lastCapture}
-                alt="Last captured page"
-                className="w-full rounded-xl border border-gray-700"
+                alt="Captured page"
+                className="w-full rounded-xl"
+                style={{ border: "1px solid var(--border)" }}
               />
-              <div className="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full">
-                ✓ Captured
+              <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                style={{ background: "#34d39930", color: "#34d399" }}>
+                <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                Captured
               </div>
             </div>
           )}
-          <div className="flex gap-3">
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-4">
             <button
               onClick={startCamera}
               disabled={disabled}
-              className="w-20 h-20 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center text-3xl shadow-xl ring-4 ring-blue-400/20"
-              title="Open camera to scan a page"
+              className="group relative flex flex-col items-center gap-2 disabled:opacity-40"
             >
-              📷
+              <div className="w-20 h-20 rounded-full flex items-center justify-center transition-all group-hover:scale-105 group-active:scale-95"
+                style={{ background: "var(--accent)", boxShadow: "0 0 0 4px var(--accent-soft)" }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              </div>
+              <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+                Camera
+              </span>
             </button>
-            <label className="w-20 h-20 rounded-full bg-gray-700 text-white hover:bg-gray-600 flex items-center justify-center text-3xl shadow-xl cursor-pointer ring-4 ring-gray-500/20" title="Upload image or PDF">
-              📁
-              <input
-                type="file"
-                accept="image/*,.pdf"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
+
+            <label className="group flex flex-col items-center gap-2 cursor-pointer">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center transition-all group-hover:scale-105 group-active:scale-95"
+                style={{ background: "var(--bg-surface)", border: "2px solid var(--border)" }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+                Upload
+              </span>
+              <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="hidden" />
             </label>
           </div>
-          <p className="text-sm text-gray-500">
-            {lastCapture ? "Capture another page or start asking questions" : "Tap 📷 to scan a page, or 📁 to upload"}
+
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            {lastCapture ? "Capture more pages or start asking" : "Scan a page or upload a file to begin"}
           </p>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-4 w-full">
-          {/* Live video preview - full width */}
-          <div className="relative w-full max-w-lg">
+        <div className="flex flex-col items-center gap-5 w-full animate-fade-in">
+          {/* Live video feed */}
+          <div className="relative w-full max-w-lg rounded-2xl overflow-hidden"
+            style={{ border: "2px solid var(--accent)" }}>
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
-              className="w-full rounded-xl bg-black shadow-lg"
+              className="w-full bg-black"
+              style={{ minHeight: "320px" }}
             />
-            {/* Frame guide overlay */}
-            <div className="absolute inset-4 border-2 border-white/30 rounded-lg pointer-events-none" />
-            <p className="absolute bottom-2 left-0 right-0 text-center text-white/70 text-xs">
-              Position the page within the frame
-            </p>
+
+            {/* Corner guides */}
+            <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 rounded-tl-lg" style={{ borderColor: "var(--accent)" }} />
+            <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 rounded-tr-lg" style={{ borderColor: "var(--accent)" }} />
+            <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 rounded-bl-lg" style={{ borderColor: "var(--accent)" }} />
+            <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 rounded-br-lg" style={{ borderColor: "var(--accent)" }} />
+
+            {/* Status indicator */}
+            <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full text-xs"
+              style={{ background: "#00000080", color: "var(--text-primary)" }}>
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              Live
+            </div>
+
+            {/* Flash overlay */}
+            {flashActive && (
+              <div className="absolute inset-0 bg-white/90 pointer-events-none transition-opacity duration-200" />
+            )}
           </div>
 
-          {/* Capture controls */}
-          <div className="flex items-center gap-4">
+          {/* Hint */}
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            Position the page so text is clearly visible, then tap the capture button
+          </p>
+
+          {/* Controls */}
+          <div className="flex items-center gap-6">
             <button
               onClick={stopCamera}
-              className="w-12 h-12 rounded-full bg-gray-700 text-white hover:bg-gray-600 flex items-center justify-center text-lg"
+              className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105"
+              style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
               title="Close camera"
             >
-              ✕
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
             </button>
+
+            {/* Main capture button */}
             <button
               onClick={capture}
               disabled={disabled}
-              className="w-20 h-20 rounded-full bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 flex items-center justify-center shadow-xl ring-4 ring-red-400/30 text-3xl transition-transform active:scale-95"
-              title="Snap! Capture this page"
+              className="relative w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40"
+              style={{ background: "white" }}
+              title="Capture page"
             >
-              📸
+              <div className="absolute inset-0 rounded-full animate-pulse-ring"
+                style={{ border: "3px solid var(--accent)" }} />
+              <div className="w-16 h-16 rounded-full"
+                style={{ border: "4px solid var(--bg)", background: "white" }} />
             </button>
-            <div className="w-12" /> {/* spacer for centering */}
+
+            <div className="w-12" />
           </div>
-          <p className="text-sm text-gray-400">
-            Press 📸 to capture the page
-          </p>
         </div>
       )}
     </div>
