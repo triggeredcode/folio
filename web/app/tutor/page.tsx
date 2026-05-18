@@ -53,9 +53,24 @@ function TutorContent() {
       setSessionError("No session ID. Go back to the homepage to start.");
       return;
     }
-    fetch(`/api/session/${sessionId}`)
-      .then(res => { if (!res.ok) setSessionError("Session not found. It may have expired."); })
-      .catch(() => setSessionError("Cannot reach backend."));
+    async function validateAndLoad() {
+      try {
+        const res = await fetch(`/api/session/${sessionId}`);
+        if (!res.ok) {
+          setSessionError("Session not found. It may have expired.");
+          return;
+        }
+        const data = await getSessionPages(sessionId);
+        if (data.pages.length > 0) {
+          for (const p of data.pages) knownPageIds.current.add(p.page_id);
+          pageCountRef.current = data.pages.length;
+          setPages(data.pages);
+        }
+      } catch {
+        setSessionError("Cannot reach backend.");
+      }
+    }
+    validateAndLoad();
   }, [sessionId]);
 
   useEffect(() => {

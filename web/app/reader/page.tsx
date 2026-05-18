@@ -27,6 +27,19 @@ function ReaderContent() {
 
   useEffect(() => {
     if (!sessionId) return;
+    getSessionPages(sessionId)
+      .then(data => {
+        if (data.pages.length > 0) {
+          for (const p of data.pages) knownPageIds.current.add(p.page_id);
+          setPages(data.pages);
+          setStatus(`${data.pages.length} page${data.pages.length !== 1 ? "s" : ""} loaded. Tap to replay.`);
+        }
+      })
+      .catch(() => {});
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!sessionId) return;
     const interval = setInterval(async () => {
       try {
         const data = await getSessionPages(sessionId);
