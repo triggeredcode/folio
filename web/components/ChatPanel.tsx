@@ -16,6 +16,8 @@ interface ChatPanelProps {
   loading?: boolean;
   onCitationClick?: (pageNumber: number) => void;
   onAddPages?: () => void;
+  starterQuestions?: string[];
+  topics?: string[];
 }
 
 export default function ChatPanel({
@@ -24,6 +26,8 @@ export default function ChatPanel({
   loading = false,
   onCitationClick,
   onAddPages,
+  starterQuestions,
+  topics,
 }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -44,10 +48,47 @@ export default function ChatPanel({
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center py-16">
-            <p className="text-base" style={{ color: "var(--text-muted)" }}>
+          <div className="flex flex-col items-center justify-center h-full text-center py-8 px-2 max-w-lg mx-auto w-full">
+            <p className="text-base mb-6" style={{ color: "var(--text-muted)" }}>
               Ask anything about your captured pages
             </p>
+
+            {topics && topics.length > 0 && (
+              <div className="mb-5 w-full">
+                <p className="text-[11px] font-medium uppercase tracking-wider mb-2"
+                  style={{ color: "var(--text-muted)" }}>
+                  Topics covered
+                </p>
+                <div className="flex flex-wrap gap-1.5 justify-center">
+                  {topics.map((t, i) => (
+                    <span key={i}
+                      className="text-xs px-2.5 py-1 rounded-full"
+                      style={{ background: "var(--bg-surface)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {starterQuestions && starterQuestions.length > 0 && (
+              <div className="w-full">
+                <p className="text-[11px] font-medium uppercase tracking-wider mb-2"
+                  style={{ color: "var(--text-muted)" }}>
+                  Try asking
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {starterQuestions.map((q, i) => (
+                    <button key={i}
+                      onClick={() => onSend(q)}
+                      className="text-left text-xs px-3 py-2.5 rounded-lg transition-all hover:scale-[1.01] active:scale-[0.99]"
+                      style={{ background: "var(--bg-surface)", color: "var(--text-primary)", border: "1px solid var(--border)" }}>
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

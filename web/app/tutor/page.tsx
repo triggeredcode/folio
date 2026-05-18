@@ -142,18 +142,20 @@ function TutorContent() {
   }, []);
 
   useEffect(() => {
-    if (mode !== "select" || selectedPageNums.size === 0 || !sessionId) {
-      setTopicsData(null);
-      return;
-    }
+    const shouldFetch = (mode === "select" && selectedPageNums.size > 0) ||
+                        (mode === "chat" && !topicsData && pages.length > 0);
+    if (!shouldFetch || !sessionId) return;
+    const pageNums = mode === "select"
+      ? Array.from(selectedPageNums)
+      : pages.map(p => p.page_number);
     let cancelled = false;
     setTopicsLoading(true);
-    getTopics(sessionId, Array.from(selectedPageNums))
+    getTopics(sessionId, pageNums)
       .then(data => { if (!cancelled) setTopicsData(data); })
       .catch(() => {})
       .finally(() => { if (!cancelled) setTopicsLoading(false); });
     return () => { cancelled = true; };
-  }, [mode, selectedPageNums, sessionId]);
+  }, [mode, selectedPageNums, sessionId, pages.length, topicsData]);
 
   const handleCapture = useCallback(
     (blob: Blob) => {
@@ -508,6 +510,8 @@ function TutorContent() {
             loading={loading}
             onCitationClick={handleCitationClick}
             onAddPages={() => { setCameFromChat(true); setMode("capture"); }}
+            starterQuestions={topicsData?.questions}
+            topics={topicsData?.topics}
           />
         )}
       </div>

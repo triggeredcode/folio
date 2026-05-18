@@ -1,9 +1,9 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
-import { createSession, getActiveSessions, ActiveSession } from "@/lib/api";
+import { createSession, getActiveSessions } from "@/lib/api";
 
 export default function Home() {
   return (
@@ -19,7 +19,7 @@ function HomeContent() {
   const isJoinMode = searchParams.get("join") === "1";
   const [loading, setLoading] = useState(false);
   const [appUrl, setAppUrl] = useState("");
-  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function getNetworkUrl() {
@@ -41,68 +41,29 @@ function HomeContent() {
   }, []);
 
   useEffect(() => {
-    async function checkActiveSessions() {
+    if (!isJoinMode) return;
+    async function autoJoin() {
       try {
         const { sessions } = await getActiveSessions();
-        setActiveSessions(sessions);
-
-        if (isJoinMode && sessions.length > 0) {
+        if (sessions.length > 0) {
           const latest = sessions[0];
-          const url = `/${latest.mode}?session=${latest.session_id}`;
-          try {
-            router.push(url);
-            setTimeout(() => {
-              if (window.location.pathname === "/") {
-                window.location.href = url;
-              }
-            }, 1000);
-          } catch {
-            window.location.href = url;
-          }
+          window.location.href = `/${latest.mode}?session=${latest.session_id}`;
         }
-      } catch { /* backend might not be up yet */ }
+      } catch { /* backend not up */ }
     }
-    checkActiveSessions();
-    const interval = setInterval(checkActiveSessions, 5000);
-    return () => clearInterval(interval);
-  }, [isJoinMode, router]);
-
-  const [error, setError] = useState<string | null>(null);
+    autoJoin();
+  }, [isJoinMode]);
 
   async function handleModeSelect(mode: "reader" | "tutor") {
     setLoading(true);
     setError(null);
     try {
       const session = await createSession(mode);
-      localStorage.setItem("folio_session_id", session.session_id);
-      localStorage.setItem("folio_mode", mode);
-      const url = `/${mode}?session=${session.session_id}`;
-      try {
-        router.push(url);
-        setTimeout(() => {
-          if (window.location.pathname === "/") {
-            window.location.href = url;
-          }
-        }, 1000);
-      } catch {
-        window.location.href = url;
-      }
+      window.location.href = `/${mode}?session=${session.session_id}`;
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Unknown error";
       setError(`Connection failed: ${msg}`);
       setLoading(false);
-    }
-  }
-
-  function joinSession(session: ActiveSession) {
-    const url = `/${session.mode}?session=${session.session_id}`;
-    try {
-      router.push(url);
-      setTimeout(() => {
-        if (window.location.pathname === "/") window.location.href = url;
-      }, 1000);
-    } catch {
-      window.location.href = url;
     }
   }
 
@@ -129,48 +90,8 @@ function HomeContent() {
             </p>
           </header>
 
-          {/* Active sessions — join existing */}
-          {activeSessions.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-[11px] font-medium uppercase tracking-wider"
-                style={{ color: "var(--text-muted)" }}>
-                Active sessions
-              </p>
-              {activeSessions.map(s => (
-                <button
-                  key={s.session_id}
-                  onClick={() => joinSession(s)}
-                  className="w-full py-3 px-4 rounded-xl text-left flex items-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99]"
-                  style={{ background: "var(--accent-soft)", border: "1px solid var(--accent)" }}
-                >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: "var(--accent)", color: "white" }}>
-                    <span className="text-xs font-bold">{s.mode === "tutor" ? "T" : "R"}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                      Join {s.mode} session
-                    </div>
-                    <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-                      {s.pages} page{s.pages !== 1 ? "s" : ""} captured
-                    </div>
-                  </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Mode selection — new session */}
+          {/* Mode selection */}
           <div className="space-y-3">
-            {activeSessions.length > 0 && (
-              <p className="text-[11px] font-medium uppercase tracking-wider"
-                style={{ color: "var(--text-muted)" }}>
-                Or start new
-              </p>
-            )}
             <button
               onClick={() => handleModeSelect("reader")}
               disabled={loading}
@@ -228,7 +149,7 @@ function HomeContent() {
 
             {loading && (
               <div className="text-center text-sm py-2" style={{ color: "var(--text-muted)" }}>
-                Connecting to backend...
+                Connecting...
               </div>
             )}
           </div>
@@ -240,7 +161,7 @@ function HomeContent() {
           </footer>
         </div>
 
-        {/* Right side — Phone mockup with QR (hidden on small screens since you're already on phone) */}
+        {/* Right side — Phone mockup with QR (hidden on small screens) */}
         <div className="hidden lg:flex flex-col items-center gap-5">
           <div
             className="relative rounded-[3rem] p-4 shadow-2xl"
@@ -250,11 +171,9 @@ function HomeContent() {
               width: "320px",
             }}
           >
-            {/* Phone notch */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 rounded-b-2xl"
               style={{ background: "var(--bg)" }} />
 
-            {/* Phone screen */}
             <div className="rounded-[2.5rem] overflow-hidden flex flex-col items-center justify-center py-14 px-8"
               style={{ background: "var(--bg)", minHeight: "480px" }}>
               <div className="text-center space-y-5">
@@ -292,7 +211,6 @@ function HomeContent() {
               </div>
             </div>
 
-            {/* Phone home indicator */}
             <div className="mx-auto mt-3 w-28 h-1.5 rounded-full"
               style={{ background: "var(--border)" }} />
           </div>
