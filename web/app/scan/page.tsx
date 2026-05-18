@@ -46,13 +46,15 @@ function ScanContent() {
         try {
           const { sessions } = await getActiveSessions();
           if (sessions.length > 0) {
-            const latest = sessions[0];
-            setSessionId(latest.session_id);
+            const target = sessions[0];
+            setSessionId(target.session_id);
             setStatus("ready");
-            const data = await getSessionPages(latest.session_id);
-            for (const p of data.pages) knownPageIds.current.add(p.page_id);
-            pageCountRef.current = data.page_count;
-            setPages(data.pages);
+            try {
+              const data = await getSessionPages(target.session_id);
+              for (const p of data.pages) knownPageIds.current.add(p.page_id);
+              pageCountRef.current = data.page_count;
+              setPages(data.pages);
+            } catch { /* empty session, that's fine */ }
             return;
           }
         } catch { /* backend not ready */ }
