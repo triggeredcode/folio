@@ -7,9 +7,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml .
-RUN pip install --no-cache-dir -e ".[dev]"
+COPY folio/ folio/
 
-COPY . .
+RUN pip install --no-cache-dir .
+
+COPY demos/ demos/
+COPY scripts/ scripts/
 
 EXPOSE 8000
 
