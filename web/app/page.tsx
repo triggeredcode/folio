@@ -37,11 +37,20 @@ export default function Home() {
       const session = await createSession(mode);
       localStorage.setItem("folio_session_id", session.session_id);
       localStorage.setItem("folio_mode", mode);
-      router.push(`/${mode}?session=${session.session_id}`);
+      const url = `/${mode}?session=${session.session_id}`;
+      try {
+        router.push(url);
+        setTimeout(() => {
+          if (window.location.pathname === "/") {
+            window.location.href = url;
+          }
+        }, 1000);
+      } catch {
+        window.location.href = url;
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Unknown error";
       setError(`Connection failed: ${msg}`);
-    } finally {
       setLoading(false);
     }
   }
@@ -68,14 +77,6 @@ export default function Home() {
               No cloud. No hallucination. Just your book, understood.
             </p>
           </header>
-
-          {/* Error display */}
-          {error && (
-            <div className="px-4 py-3 rounded-xl text-sm text-left animate-fade-in"
-              style={{ background: "#ef444415", border: "1px solid #ef444430", color: "#fca5a5" }}>
-              {error}
-            </div>
-          )}
 
           {/* Mode selection */}
           <div className="space-y-3">
@@ -126,6 +127,19 @@ export default function Home() {
                 </div>
               </div>
             </button>
+
+            {error && (
+              <div className="px-4 py-3 rounded-xl text-sm text-left animate-fade-in"
+                style={{ background: "#ef444415", border: "1px solid #ef444430", color: "#fca5a5" }}>
+                {error}
+              </div>
+            )}
+
+            {loading && (
+              <div className="text-center text-sm py-2" style={{ color: "var(--text-muted)" }}>
+                Connecting to backend...
+              </div>
+            )}
           </div>
 
           <footer>
