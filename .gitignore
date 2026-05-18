@@ -10,6 +10,9 @@ build/
 # Media files (generated at runtime)
 media/
 
+# Auto-generated vision/ask caches (keep hero demos in demos/biology_ch3/)
+demos/cached_responses/
+
 # Node
 web/node_modules/
 web/.next/
