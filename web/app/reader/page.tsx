@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import CameraCapture from "@/components/CameraCapture";
 import PageStrip from "@/components/PageStrip";
-import { PageData, ingestPageSSE, generateTTS, getSessionPages } from "@/lib/api";
+import { PageData, ingestPageSSE, generateTTS, getSessionPages, getPageImageUrl } from "@/lib/api";
 
 export default function ReaderPage() {
   return (
@@ -165,10 +165,15 @@ function ReaderContent() {
           onEnded={() => setIsPlaying(false)}
         />
 
-        {/* Page strip */}
+        {/* Page strip with thumbnails */}
         {pages.length > 0 && (
           <div className="w-full max-w-md">
-            <PageStrip pages={pages} activePage={activePage} onPageClick={handlePageClick} />
+            <PageStrip
+              pages={pages}
+              activePage={activePage}
+              onPageClick={handlePageClick}
+              thumbnails={new Map(pages.map(p => [p.page_number, getPageImageUrl(sessionId, p.page_number)]))}
+            />
           </div>
         )}
 

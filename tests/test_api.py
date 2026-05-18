@@ -57,3 +57,15 @@ class TestHealthAndSession:
         assert "ip" in data
         assert "port" in data
         assert isinstance(data["port"], int)
+
+    @pytest.mark.asyncio
+    async def test_topics_no_pages(self, client):
+        resp = await client.post("/api/session", json={"mode": "tutor"})
+        sid = resp.json()["session_id"]
+        resp2 = await client.post(f"/api/session/{sid}/topics", json={})
+        assert resp2.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_topics_not_found(self, client):
+        resp = await client.post("/api/session/nonexistent/topics", json={})
+        assert resp.status_code == 404
