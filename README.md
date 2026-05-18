@@ -37,17 +37,18 @@ ollama serve
 # 4. Install Python backend
 pip install -e ".[dev]"
 
-# 5. Start the backend
-make backend
+# 5. Start the backend (port 8001)
+uvicorn folio.api:app --host 0.0.0.0 --port 8001
 ```
 
 In another terminal:
 ```bash
-# 6. Install and start the frontend
-cd web && pnpm install && pnpm dev
+# 6. Install and start the frontend (port 8000)
+cd web && pnpm install
+NEXT_PUBLIC_API_URL=http://localhost:8001 pnpm dev --port 8000
 ```
 
-Open http://localhost:3000 in your browser.
+Open http://localhost:8000 in your browser. Scan the QR code from your phone (same Wi-Fi) to use your phone camera.
 
 ### Demo Mode (no Ollama needed)
 
@@ -72,11 +73,21 @@ User (phone/laptop browser)
   │
   ├── Camera capture / PDF upload
   │
-Next.js UI (:3000) ──── FastAPI (:8000) ──── Ollama (:11434)
+Next.js UI (:8000) ──── FastAPI (:8001) ──── Ollama (:11434)
                               │                   gemma4:e4b
-                              ├── Context Bank (in-memory)
+                              ├── Vision: page extraction + structured output
+                              ├── RAG: BM25 retrieval + grounded Q&A
+                              ├── Context Bank (in-memory sessions)
                               └── TTS (macOS say / Piper)
 ```
+
+### Cross-Device Flow
+
+1. Start Folio on your laptop
+2. Scan the QR code on the homepage with your phone
+3. Phone joins the same session — snap pages with your phone camera
+4. Pages appear on both devices in real-time
+5. Chat on either device, answers are grounded in your captured pages
 
 ## Testing
 
@@ -108,10 +119,15 @@ FOLIO_DEMO_MODE=1 pytest tests/test_headless.py -v
 | GET | `/api/health` | Health check |
 | POST | `/api/session` | Create a session |
 | GET | `/api/session/:id` | Get session state |
+| GET | `/api/session/:id/pages` | List all pages in session |
+| GET | `/api/session/:id/page/:n/image` | Serve raw page image |
+| POST | `/api/session/:id/topics` | Extract topics + starter questions |
+| GET | `/api/sessions/active` | List active sessions |
 | POST | `/api/page` | Ingest a page image (SSE) |
 | POST | `/api/pdf` | Ingest a PDF (SSE) |
 | POST | `/api/ask` | Ask a grounded question (SSE) |
 | POST | `/api/tts` | Generate speech audio |
+| GET | `/api/network-info` | Get LAN IP for cross-device |
 
 ## Hackathon
 
