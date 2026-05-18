@@ -4,101 +4,91 @@
 
 ## The Problem
 
-700 million people worldwide are visually impaired. In India alone, 12 million school-age children study from printed textbooks they struggle to read. Meanwhile, every exam student globally shares a universal frustration: reading 30 pages of dense biology, then having no one to quiz them at midnight.
+In a rural classroom in Maharashtra, India, Aanya — a 12-year-old with low vision — presses her face inches from a biology textbook. She can make out the words, slowly, but the diagram of a plant cell? It's a blur of lines she'll never decipher. Her teacher has 60 students and no time to describe every figure individually.
 
-Current solutions fail both groups. OCR apps give raw text without understanding diagrams. ChatGPT hallucinates freely beyond what's on the page. Cloud-based tutors require internet that rural schools don't have. And nothing runs locally, privately, on hardware a student already owns.
+Meanwhile, thousands of kilometers away, Rohan is cramming for his 10th-grade board exams at midnight. He's read the same chapter three times but has nobody to quiz him, nobody to tell him if he actually understands mitochondria or is just memorizing sentences.
 
-## Our Solution
+Both students are failed by the same gap: **printed textbooks are static, and AI tutors hallucinate.** OCR apps give raw text but can't describe a diagram. ChatGPT fabricates answers beyond the textbook. Cloud-based tutors need internet that rural schools don't have. Nothing runs locally, privately, on hardware a student already owns.
 
-**Folio** turns any physical textbook into an interactive study companion using Gemma 4's multimodal intelligence — running entirely on a local machine via Ollama. No cloud. No data leaves the room.
+## Folio: Two Modes, Two Students, One Model
 
-Two modes serve two real users:
+**Folio** turns any physical textbook into an interactive study companion powered by Gemma 4 E4B running locally via Ollama. No cloud, no API keys, no data leaving the room.
 
-- **Reader mode** for Aanya, a 12-year-old partially-sighted student in rural Maharashtra. She points her phone at a biology page. Folio reads it aloud with rich diagram descriptions ("A circular cell diagram shows the nucleus in the center, surrounded by cytoplasm..."). She learns what sighted students take for granted — the visual content of her own textbook.
+**Reader mode** is built for Aanya. She points her phone at a page. Folio reads it aloud and — critically — *describes the diagrams*: "A circular cell diagram shows the nucleus in the center, surrounded by cytoplasm. The cell membrane forms the outer boundary. Mitochondria appear as small oval structures scattered through the cytoplasm." She hears what sighted students see.
 
-- **Tutor mode** for Rohan, a 15-year-old preparing for exams. He captures his chapter, selects pages, and asks questions. Folio answers with citations: "Mitochondria are the powerhouses of the cell [page 3]." If he asks something not in the book, Folio refuses: "This isn't covered in the captured pages." No hallucination. No guessing.
+**Tutor mode** is built for Rohan. He snaps photos of his chapter from his phone, selects pages to study, and asks questions. Folio answers *only from the book*: "Mitochondria are called the powerhouses of the cell because they produce ATP through cellular respiration [page 3]." If he asks about something not on those pages, Folio refuses: *"This isn't covered in the captured pages."*
 
-## How It Works
-
-### Architecture
-
-Folio is a two-tier web application:
+## Architecture
 
 ```
-Phone (camera) ──Wi-Fi──▸ Next.js UI (:8000) ──▸ FastAPI (:8001) ──▸ Ollama (gemma4:e4b)
+Phone (camera) ──Wi-Fi──▶ Next.js (:8000) ──▶ FastAPI (:8001) ──▶ Ollama (gemma4:e4b)
 ```
 
-The phone acts as a wireless camera. The laptop runs the brain. Both share a session in real-time.
+The phone is a wireless camera. The laptop is the brain. Both share a session in real-time — pages captured on the phone appear on the laptop instantly. One big QR code on the homepage connects them.
 
-### Gemma 4 Integration (3 distinct uses)
+## Three Uses of Gemma 4
 
-**1. Multimodal Vision Extraction.** Each captured page image is sent to `gemma4:e4b` with a structured extraction prompt. Gemma 4's vision capabilities parse the image into a JSON schema: `{text, headings[], diagrams[], captions[]}`. The diagram descriptions are deliberately detailed for accessibility — spatial relationships, colors, labels, and relative positions are all captured, because a blind student can't "see" the diagram.
+**1. Multimodal Vision Extraction.** Each page image goes to `gemma4:e4b` with a structured prompt that outputs JSON: `{text, headings[], diagrams[], captions[]}`. Diagram descriptions are deliberately detailed — spatial relationships, colors, labels, relative positions — because a blind student needs to *hear* the picture.
 
-**2. Grounded Q&A with Anti-Hallucination.** When a student asks a question, Folio retrieves relevant pages via BM25, constructs a context window, and prompts Gemma 4 with strict grounding rules: cite every claim as `[page N]`, refuse if the answer isn't in the book. This isn't a suggestion — it's enforced through prompt engineering and verified through automated adversarial testing.
+**2. Grounded Q&A with Anti-Hallucination.** When Rohan asks a question, Folio retrieves relevant pages via BM25, builds a context window, and prompts Gemma 4 with strict grounding rules: cite every claim as `[page N]`, refuse if the answer isn't in the book. This is enforced through prompt engineering and verified by 48 automated tests — including adversarial questions designed to trick the model into using training knowledge.
 
-**3. Topic Extraction.** Before chatting, Folio asks Gemma 4 to identify key topics and generate starter questions from the selected pages, giving students a structured entry point into study.
+**3. Topic Extraction + Starter Questions.** Before chatting, Folio identifies key topics from selected pages and suggests questions: "What is the cell theory?" "What are the functions of mitochondria?" Students get a structured entry point, not a blank chat box.
 
-### Image Optimization
+## Cross-Device Camera Flow
 
-Phone camera images are often 4000×3000 pixels. Before sending to Gemma 4, Folio resizes images to a maximum of 1024px on the longest side and compresses to JPEG quality 85. This reduces vision call latency by 3-5x without meaningful loss of text legibility.
+Laptop webcams face the wrong way for scanning books. Folio's answer:
 
-### Cross-Device Architecture
+1. Open Folio on your laptop → click Tutor
+2. Scan the QR code with your phone (same Wi-Fi)
+3. Phone opens a minimal black screen — one camera button, nothing else
+4. Snap pages as fast as you want — they queue and upload in parallel
+5. Pages appear on the laptop in real-time via polling
 
-The phone-as-camera pattern solves a real UX problem: laptop webcams face the wrong way for scanning books. Folio's solution:
-
-1. Start a session on the laptop (Reader or Tutor mode)
-2. Scan the homepage QR code with your phone (same Wi-Fi)
-3. Phone opens a minimal camera-only interface — one big button, no distractions
-4. Captured pages stream to the laptop session via the FastAPI backend
-5. Both devices see pages in real-time through polling
-
-The phone scanner auto-discovers the laptop's active session, and periodically re-checks every 5 seconds. If the laptop creates a new session, the phone auto-switches. No manual re-pairing needed.
-
-### Anti-Hallucination Verification
-
-We built automated adversarial tests that verify grounding. The test suite includes questions whose answers are in the captured pages (must answer correctly with citations) and questions whose answers are NOT in the pages (must refuse). All 48 tests pass consistently, including:
-
-- `test_grounded_in_book`: Verifies correct answers from captured content
-- `test_not_in_book`: Verifies refusal for out-of-scope questions  
-- `test_citation_accuracy`: Verifies page citations match actual source pages
-- `test_adversarial_refusals`: Attempts to trick the model with training-data questions
-
-### Demo Mode
-
-For reproducible demonstrations, `FOLIO_DEMO_MODE=1` replays cached Ollama responses. The first real inference is cached; subsequent runs replay deterministically. This ensures the video demo is honest — same inputs, same outputs, verifiable.
+The phone auto-discovers the laptop's active session and re-checks every 5 seconds. Create a new session on the laptop and the phone auto-switches. Zero configuration.
 
 ## Technical Decisions
 
-**Why Gemma 4 E4B?** The 8B-total/4.5B-active architecture delivers multimodal understanding (vision + text) within a laptop's memory budget. The 128K context window comfortably holds 8+ pages of textbook content. Apache 2.0 licensing means students can use this freely.
+**Why Gemma 4 E4B?** 8B total / 4.5B active parameters — fits in laptop memory. Multimodal (vision + text) in a single model. 128K context window holds 8+ textbook pages. Apache 2.0 — free forever.
 
-**Why Ollama?** Local inference is non-negotiable for this use case. Rural Indian schools have intermittent internet. Student data (captured textbook pages, study questions) should never leave the device. Ollama makes local Gemma 4 deployment a single `ollama pull` command.
+**Why Ollama?** Local inference is non-negotiable. Rural Indian schools have intermittent internet. Student data should never leave the device. `ollama pull gemma4:e4b` is the entire setup.
 
-**Why BM25 over embeddings?** With ≤30 pages per session, BM25's simplicity wins. No embedding model needed, no vector store, no additional download. When pages < 8, we skip retrieval entirely and pass all pages — Gemma 4's 128K context handles it.
+**Why BM25 over vector embeddings?** With ≤30 pages per session, BM25's zero-dependency simplicity wins. No embedding model download, no vector store. When pages < 8, we skip retrieval entirely — Gemma 4's 128K context handles it all.
 
-**Why SSE over WebSockets?** Server-Sent Events are simpler, work through HTTP proxies, and handle our use case perfectly: one-directional streaming of ingestion progress and Q&A responses.
+**Why SSE?** Server-Sent Events work through proxies, are simpler than WebSockets, and perfectly fit our use case: streaming ingestion progress and Q&A results.
+
+## Anti-Hallucination: Tested, Not Promised
+
+We don't just *prompt* Gemma 4 to stay grounded — we *verify* it. Our test suite includes:
+
+- **Grounded questions**: Must answer correctly with citations
+- **Out-of-scope questions**: Must refuse ("This isn't covered in the captured pages")
+- **Adversarial questions**: Training-data questions designed to trigger hallucination
+- **Citation accuracy**: Page references must match actual source pages
+
+All 48 tests pass. The model stays inside the book.
+
+## Image Optimization
+
+Phone cameras produce 4000×3000 images. Before sending to Gemma 4, Folio resizes to max 1024px and compresses to JPEG quality 85. This cuts vision call latency by 3-5x without losing text legibility.
 
 ## Impact
 
-Folio addresses two of the hackathon's core themes:
+Folio sits at the intersection of **Future of Education** and **Digital Equity**:
 
-**Future of Education:** A multi-tool AI companion that adapts to the learner (voice-first for accessibility, chat-first for exam prep) and empowers educators by making any printed textbook interactive.
+- **Accessibility**: Reader mode makes visual content audible — diagrams described, not just text read
+- **Anti-hallucination**: Students get answers from *their* book, with citations, or a refusal
+- **Privacy**: Nothing leaves the device. No accounts, no cloud, no tracking
+- **Minimal hardware**: A laptop with Ollama + a phone with a browser + Wi-Fi
 
-**Digital Equity & Inclusivity:** By running locally, Folio works without internet. By describing diagrams aloud, it makes visual content accessible to blind students. By using Gemma 4's Apache 2.0 license, it's free to deploy anywhere.
-
-The technology is deliberately minimal — a laptop with Ollama, a phone with a browser, and a Wi-Fi connection. No GPU cluster. No API keys. No subscription. A teacher in a rural school can set this up in 10 minutes.
+A teacher sets this up in 10 minutes. A student uses it alone at midnight. The technology is deliberately minimal because the students who need it most have the least.
 
 ## Challenges Overcome
 
-1. **Vision prompt engineering** for structured JSON extraction that reliably produces valid output across diverse textbook layouts (biology diagrams, math equations, dense text)
-2. **Cross-device camera relay** without HTTPS certificates — solved using HTML5 `capture="environment"` attribute for direct camera access over HTTP
-3. **Session synchronization** across devices with automatic session discovery and re-pairing
-4. **Latency optimization** — image compression, non-blocking TTS, and parallel processing reduced per-page ingestion from ~8s to ~2s
+1. **Vision prompt engineering** — structured JSON extraction across diverse layouts (biology diagrams, math equations, dense text)
+2. **Cross-device camera without HTTPS** — HTML5 `capture="environment"` enables direct camera access over HTTP on mobile
+3. **Session synchronization** — automatic discovery and re-pairing across devices
+4. **Latency** — image compression + non-blocking TTS + parallel processing reduced per-page time from ~8s to ~2s
 
 ## Repository
 
-- **48 automated tests** covering vision, Q&A, retrieval, API, cross-device sync, and adversarial grounding
-- **Demo mode** with cached responses for reproducible demonstrations
-- **Docker support** for containerized deployment
-- **Full API documentation** with 11 REST/SSE endpoints
-
-Built in a weekend. Runs on a MacBook. Changes how students learn from books.
+48 automated tests. Demo mode with cached responses. Docker support. 11 documented API endpoints. Built to be verified, not just demonstrated.
