@@ -8,6 +8,11 @@ interface CameraCaptureProps {
   compact?: boolean;
 }
 
+function canUseLiveCamera(): boolean {
+  if (typeof window === "undefined") return false;
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
+
 export default function CameraCapture({
   onCapture,
   disabled = false,
@@ -20,14 +25,15 @@ export default function CameraCapture({
   const [lastCapture, setLastCapture] = useState<string | null>(null);
   const [flashActive, setFlashActive] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
+  const [hasLiveCamera, setHasLiveCamera] = useState(true);
+
+  useEffect(() => {
+    setHasLiveCamera(canUseLiveCamera());
+  }, []);
 
   const startCamera = useCallback(async () => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setError(
-        window.location.protocol === "http:"
-          ? "Camera requires HTTPS. Open this page via the HTTPS link to use the camera, or use the Upload button."
-          : "Camera API not available on this device. Use the Upload button instead."
-      );
+    if (!canUseLiveCamera()) {
+      setError("Live camera not available over HTTP. Use 'Take Photo' to open your camera.");
       return;
     }
     try {
@@ -46,9 +52,9 @@ export default function CameraCapture({
       if (name === "NotAllowedError") {
         setError("Camera permission denied. Check your browser settings and tap Retry.");
       } else if (name === "NotFoundError") {
-        setError("No camera found on this device. Use the Upload button instead.");
+        setError("No camera found. Use Take Photo or Upload instead.");
       } else {
-        setError(`Camera error: ${name || "unknown"}. Use Upload instead.`);
+        setError(`Camera error: ${name || "unknown"}`);
       }
     }
   }, []);
@@ -73,7 +79,6 @@ export default function CameraCapture({
 
     ctx.drawImage(video, 0, 0);
 
-    // Flash effect
     setFlashActive(true);
     setTimeout(() => setFlashActive(false), 200);
 
@@ -135,37 +140,50 @@ export default function CameraCapture({
             Upload File
             <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="hidden" />
           </label>
-          <button
-            onClick={() => { setError(null); startCamera(); }}
-            className="px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Retry Camera
-          </button>
+          {hasLiveCamera && (
+            <button
+              onClick={() => { setError(null); startCamera(); }}
+              className="px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Retry
+            </button>
+          )}
         </div>
       </div>
     );
   }
 
-  // Compact mode for tutor page header
   if (compact) {
     return (
       <div className="flex items-center gap-2">
         <canvas ref={canvasRef} className="hidden" />
         {!streaming ? (
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={startCamera}
-              disabled={disabled}
-              className="h-9 px-3 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all disabled:opacity-40"
-              style={{ background: "var(--accent)", color: "white" }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                <circle cx="12" cy="13" r="4"/>
-              </svg>
-              Scan
-            </button>
+            {hasLiveCamera ? (
+              <button
+                onClick={startCamera}
+                disabled={disabled}
+                className="h-9 px-3 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all disabled:opacity-40"
+                style={{ background: "var(--accent)", color: "white" }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                Scan
+              </button>
+            ) : (
+              <label className="h-9 px-3 rounded-lg text-sm font-medium flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-40"
+                style={{ background: "var(--accent)", color: "white" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                Photo
+                <input type="file" accept="image/*" capture="environment" onChange={handleFileUpload} className="hidden" />
+              </label>
+            )}
             <label className="h-9 px-3 rounded-lg text-sm font-medium flex items-center gap-1.5 cursor-pointer transition-all"
               style={{ background: "var(--bg-surface)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -212,14 +230,12 @@ export default function CameraCapture({
     );
   }
 
-  // Full mode: big camera preview
   return (
     <div className="flex flex-col items-center gap-5 w-full">
       <canvas ref={canvasRef} className="hidden" />
 
       {!streaming ? (
         <div className="flex flex-col items-center gap-5 w-full">
-          {/* Show last capture preview */}
           {lastCapture && (
             <div className="relative w-full max-w-md animate-fade-in">
               <img
@@ -236,24 +252,39 @@ export default function CameraCapture({
             </div>
           )}
 
-          {/* Action buttons */}
           <div className="flex items-center gap-4">
-            <button
-              onClick={startCamera}
-              disabled={disabled}
-              className="group relative flex flex-col items-center gap-2 disabled:opacity-40"
-            >
-              <div className="w-20 h-20 rounded-full flex items-center justify-center transition-all group-hover:scale-105 group-active:scale-95"
-                style={{ background: "var(--accent)", boxShadow: "0 0 0 4px var(--accent-soft)" }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                  <circle cx="12" cy="13" r="4"/>
-                </svg>
-              </div>
-              <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-                Camera
-              </span>
-            </button>
+            {hasLiveCamera ? (
+              <button
+                onClick={startCamera}
+                disabled={disabled}
+                className="group relative flex flex-col items-center gap-2 disabled:opacity-40"
+              >
+                <div className="w-20 h-20 rounded-full flex items-center justify-center transition-all group-hover:scale-105 group-active:scale-95"
+                  style={{ background: "var(--accent)", boxShadow: "0 0 0 4px var(--accent-soft)" }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                </div>
+                <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+                  Camera
+                </span>
+              </button>
+            ) : (
+              <label className="group relative flex flex-col items-center gap-2 cursor-pointer">
+                <div className="w-20 h-20 rounded-full flex items-center justify-center transition-all group-hover:scale-105 group-active:scale-95"
+                  style={{ background: "var(--accent)", boxShadow: "0 0 0 4px var(--accent-soft)" }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                </div>
+                <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+                  Take Photo
+                </span>
+                <input type="file" accept="image/*" capture="environment" onChange={handleFileUpload} className="hidden" />
+              </label>
+            )}
 
             <label className="group flex flex-col items-center gap-2 cursor-pointer">
               <div className="w-20 h-20 rounded-full flex items-center justify-center transition-all group-hover:scale-105 group-active:scale-95"
@@ -277,7 +308,6 @@ export default function CameraCapture({
         </div>
       ) : (
         <div className="flex flex-col items-center gap-5 w-full animate-fade-in">
-          {/* Live video feed */}
           <div className="relative w-full max-w-lg rounded-2xl overflow-hidden"
             style={{ border: "2px solid var(--accent)" }}>
             <video
@@ -289,31 +319,26 @@ export default function CameraCapture({
               style={{ minHeight: "320px" }}
             />
 
-            {/* Corner guides */}
             <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 rounded-tl-lg" style={{ borderColor: "var(--accent)" }} />
             <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 rounded-tr-lg" style={{ borderColor: "var(--accent)" }} />
             <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 rounded-bl-lg" style={{ borderColor: "var(--accent)" }} />
             <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 rounded-br-lg" style={{ borderColor: "var(--accent)" }} />
 
-            {/* Status indicator */}
             <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full text-xs"
               style={{ background: "#00000080", color: "var(--text-primary)" }}>
               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
               Live
             </div>
 
-            {/* Flash overlay */}
             {flashActive && (
               <div className="absolute inset-0 bg-white/90 pointer-events-none transition-opacity duration-200" />
             )}
           </div>
 
-          {/* Hint */}
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
             Position the page so text is clearly visible, then tap the capture button
           </p>
 
-          {/* Controls */}
           <div className="flex items-center gap-6">
             <button
               onClick={stopCamera}
@@ -327,7 +352,6 @@ export default function CameraCapture({
               </svg>
             </button>
 
-            {/* Main capture button */}
             <button
               onClick={capture}
               disabled={disabled}
