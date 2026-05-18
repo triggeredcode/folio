@@ -150,8 +150,8 @@ export default function Home() {
           </footer>
         </div>
 
-        {/* Right side — Phone mockup with QR */}
-        <div className="flex flex-col items-center gap-5">
+        {/* Right side — Phone mockup with QR (hidden on small screens since you're already on phone) */}
+        <div className="hidden lg:flex flex-col items-center gap-5">
           <div
             className="relative rounded-[3rem] p-4 shadow-2xl"
             style={{

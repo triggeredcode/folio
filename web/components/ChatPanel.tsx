@@ -106,7 +106,7 @@ export default function ChatPanel({
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="px-4 py-3 flex items-center gap-2"
+      <form onSubmit={handleSubmit} className="px-4 py-3 flex items-center gap-2 safe-bottom"
         style={{ borderTop: "1px solid var(--border)" }}>
         {onAddPages && (
           <button
