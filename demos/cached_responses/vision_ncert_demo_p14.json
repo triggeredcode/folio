@@ -1,0 +1,31 @@
+{
+  "text": "What do you observe? Do you observe the cells of the onion root tip? Are they similar in structure? Do you find any structural differences in these cells? If yes, why is it so?\n\nThis is because the cells of a growing tip of root of onion divide continuously. This process is called cell division. Fig. 2.17 shows various stages of cell division. Therefore, these cells exhibit different structures corresponding to different stages of cell division. Can you identify which stage comes first during cell division?\n\nEvery day, an estimated hundreds of billions of cells in our body are replaced, which is almost 1 per cent of the total number of cells in our body. Both prokaryotic and eukaryotic cells divide, but eukaryotic cells divide in a more controlled and orderly manner by a process called the cell cycle. You will learn about the stages of cell division in higher grades.\n\nMitosis\n\nEvery human begins life as a single fertilised egg. This one cell divides repeatedly to form trillions of cells in the body. Cells increase in number through mitosis, which is the most common type of cell division (Fig. 2.18).\n\nMitosis produces two genetically identical daughter cells from one parent cell. Each new cell gets the same DNA and the same number of chromosomes as the parent cell. This ensures that genetic information is largely maintained across body cells.",
+  "headings": [
+    {
+      "level": 2,
+      "text": "2.4.1 Cell division"
+    },
+    {
+      "level": 3,
+      "text": "Mitosis"
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "Fig. 2.17",
+      "label": "Different stages of cell division in onion root tip cells",
+      "description": "The diagram shows a cross-section of onion root tip cells, illustrating various stages of cell division. The cells are arranged in layers, showing distinct nuclear and cytoplasmic structures. The stages depicted include early stages (prophase/prometaphase) where chromosomes are visible and condensing, middle stages (metaphase/anaphase) where chromosomes are aligned or separating, and late stages (telophase/cytokinesis) where the cell is dividing into two daughter cells. The overall structure shows the progression from one cell to two.",
+      "labels": []
+    },
+    {
+      "id": "Fig. 2.18",
+      "label": "Mitosis",
+      "description": "The diagram illustrates the process of mitosis, showing the division of a parent cell into two daughter cells. The process is shown in a sequence of stages. The parent cell (top) undergoes division, resulting in two daughter cells (bottom). The diagram uses simple, stylized representations of the cell structure and the separation of genetic material, emphasizing the maintenance of genetic information.",
+      "labels": []
+    }
+  ],
+  "captions": [
+    "Fig. 2.17: Different stages of cell division in onion root tip cells",
+    "Fig. 2.18: Mitosis is the process that produces two genetically identical daughter cells"
+  ]
+}

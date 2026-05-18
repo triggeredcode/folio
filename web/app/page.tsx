@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { QRCodeSVG } from "qrcode.react";
 import { createSession } from "@/lib/api";
 
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [appUrl, setAppUrl] = useState("");
+
+  useEffect(() => {
+    setAppUrl(window.location.href);
+  }, []);
 
   async function handleModeSelect(mode: "reader" | "tutor") {
     setLoading(true);
@@ -16,7 +23,7 @@ export default function Home() {
       localStorage.setItem("folio_mode", mode);
       router.push(`/${mode}?session=${session.session_id}`);
     } catch {
-      alert("Failed to connect to Folio backend. Is the server running?");
+      alert("Cannot connect to the backend. Is the server running?");
     } finally {
       setLoading(false);
     }
@@ -25,82 +32,106 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6"
       style={{ background: "var(--bg)" }}>
-      <div className="max-w-lg w-full space-y-10 text-center">
-        <header className="space-y-4">
-          <h1 className="text-6xl font-bold tracking-tight"
+      <div className="max-w-md w-full space-y-10 text-center">
+        {/* Title */}
+        <header className="space-y-3">
+          <h1 className="text-5xl font-bold tracking-tight"
             style={{ color: "var(--text-primary)" }}>
-            Folio
+            folio
           </h1>
-          <p className="text-xl leading-relaxed"
+          <p className="text-base leading-relaxed"
             style={{ color: "var(--text-secondary)" }}>
             Point your camera at any textbook page.<br />
-            Folio reads it aloud and answers your questions.
+            Ask questions. Get grounded answers.
           </p>
         </header>
 
-        <div className="grid gap-4">
+        {/* Mode buttons */}
+        <div className="space-y-3">
           <button
             onClick={() => handleModeSelect("reader")}
             disabled={loading}
-            className="group relative w-full p-7 rounded-2xl text-left transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
+            className="group w-full py-4 px-5 rounded-xl text-left flex items-center gap-4 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
             style={{
               background: "var(--bg-elevated)",
               border: "1px solid var(--border)",
             }}
           >
-            <div className="flex items-start gap-5">
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                style={{ background: "#7c3aed20" }}>
-                🔊
-              </div>
-              <div className="space-y-1.5">
-                <h2 className="text-xl font-semibold"
-                  style={{ color: "var(--text-primary)" }}>
-                  Reader Mode
-                </h2>
-                <p className="text-sm leading-relaxed"
-                  style={{ color: "var(--text-secondary)" }}>
-                  Voice-first experience. Snap a page and hear it narrated with full diagram descriptions. Built for accessibility.
-                </p>
+            <span className="text-2xl">🔊</span>
+            <div>
+              <div className="font-medium" style={{ color: "var(--text-primary)" }}>Reader</div>
+              <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+                Reads pages aloud with diagram descriptions
               </div>
             </div>
-            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-              style={{ border: "1px solid #7c3aed50" }} />
           </button>
 
           <button
             onClick={() => handleModeSelect("tutor")}
             disabled={loading}
-            className="group relative w-full p-7 rounded-2xl text-left transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
+            className="group w-full py-4 px-5 rounded-xl text-left flex items-center gap-4 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
             style={{
               background: "var(--bg-elevated)",
               border: "1px solid var(--border)",
             }}
           >
-            <div className="flex items-start gap-5">
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                style={{ background: "#4f6ef720" }}>
-                💬
-              </div>
-              <div className="space-y-1.5">
-                <h2 className="text-xl font-semibold"
-                  style={{ color: "var(--text-primary)" }}>
-                  Tutor Mode
-                </h2>
-                <p className="text-sm leading-relaxed"
-                  style={{ color: "var(--text-secondary)" }}>
-                  Chat with your textbook. Capture pages, then ask questions. Answers cite exactly where they come from.
-                </p>
+            <span className="text-2xl">💬</span>
+            <div>
+              <div className="font-medium" style={{ color: "var(--text-primary)" }}>Tutor</div>
+              <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+                Chat with your textbook, answers cite the source
               </div>
             </div>
-            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-              style={{ border: "1px solid var(--accent)" }} />
           </button>
         </div>
 
-        <footer className="pt-2">
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Powered by Gemma 4 &middot; Runs locally &middot; Your data stays on this device
+        {/* Connect with Phone */}
+        <div className="pt-2">
+          <button
+            onClick={() => setShowQR(!showQR)}
+            className="w-full py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all"
+            style={{
+              background: showQR ? "var(--bg-surface)" : "transparent",
+              border: "1px solid var(--border)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+              <line x1="12" y1="18" x2="12.01" y2="18"/>
+            </svg>
+            <span className="text-sm font-medium">
+              {showQR ? "Hide QR" : "Open on Phone"}
+            </span>
+          </button>
+
+          {showQR && appUrl && (
+            <div className="mt-4 flex flex-col items-center gap-4 animate-fade-in">
+              <div className="p-4 rounded-2xl" style={{ background: "white" }}>
+                <QRCodeSVG
+                  value={appUrl}
+                  size={200}
+                  level="M"
+                  bgColor="white"
+                  fgColor="#0c0c0f"
+                />
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                  Scan to open Folio on your phone
+                </p>
+                <p className="text-[11px] font-mono px-2 py-1 rounded"
+                  style={{ background: "var(--bg-surface)", color: "var(--text-muted)" }}>
+                  {appUrl}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <footer>
+          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            Powered by Gemma 4 &middot; Runs locally &middot; Nothing leaves your device
           </p>
         </footer>
       </div>
