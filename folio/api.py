@@ -66,7 +66,7 @@ async def health():
 
 @app.get("/api/network-info")
 async def network_info():
-    """Return the machine's LAN IP and ngrok URL for QR code generation."""
+    """Return the machine's LAN IP for QR code generation."""
     import socket
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -75,21 +75,7 @@ async def network_info():
         s.close()
     except Exception:
         ip = "127.0.0.1"
-
-    ngrok_url = None
-    try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
-            resp = await client.get("http://localhost:4040/api/tunnels")
-            if resp.status_code == 200:
-                tunnels = resp.json().get("tunnels", [])
-                for t in tunnels:
-                    if t.get("public_url", "").startswith("https://"):
-                        ngrok_url = t["public_url"]
-                        break
-    except Exception:
-        pass
-
-    return {"ip": ip, "port": PORT, "ngrok_url": ngrok_url}
+    return {"ip": ip, "port": PORT}
 
 
 @app.post("/api/session")

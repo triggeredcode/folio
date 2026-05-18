@@ -15,14 +15,9 @@ export default function Home() {
       try {
         const res = await fetch("/api/network-info");
         if (res.ok) {
-          const { ip, port, ngrok_url } = await res.json();
-          if (ngrok_url) {
-            setAppUrl(ngrok_url);
-          } else {
-            const proto = window.location.protocol;
-            const currentPort = window.location.port || port;
-            setAppUrl(`${proto}//${ip}:${currentPort}`);
-          }
+          const { ip, port } = await res.json();
+          const currentPort = window.location.port || port;
+          setAppUrl(`http://${ip}:${currentPort}`);
         } else {
           setAppUrl(window.location.href);
         }
