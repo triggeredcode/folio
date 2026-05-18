@@ -6,7 +6,10 @@ import { QRCodeSVG } from "qrcode.react";
 import CameraCapture from "@/components/CameraCapture";
 import ChatPanel from "@/components/ChatPanel";
 import PdfUpload from "@/components/PdfUpload";
-import { PageData, ingestPageSSE, ingestPdfSSE, askQuestionSSE, getSessionPages } from "@/lib/api";
+import {
+  PageData, ingestPageSSE, ingestPdfSSE, askQuestionSSE,
+  getSessionPages, getTopics, getPageImageUrl, TopicsResponse,
+} from "@/lib/api";
 
 interface Message {
   id: string;
@@ -41,10 +44,13 @@ function TutorContent() {
   const [activePage, setActivePage] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<"capture" | "chat">("capture");
+  const [mode, setMode] = useState<"capture" | "select" | "chat">("capture");
   const [cameFromChat, setCameFromChat] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [sessionUrl, setSessionUrl] = useState("");
+  const [selectedPageNums, setSelectedPageNums] = useState<Set<number>>(new Set());
+  const [topicsData, setTopicsData] = useState<TopicsResponse | null>(null);
+  const [topicsLoading, setTopicsLoading] = useState(false);
   const knownPageIds = useRef(new Set<string>());
   const pageCountRef = useRef(0);
 
@@ -110,6 +116,43 @@ function TutorContent() {
     }, 3000);
     return () => clearInterval(interval);
   }, [sessionId]);
+
+  const enterSelectMode = useCallback(() => {
+    setSelectedPageNums(new Set(pages.map(p => p.page_number)));
+    setTopicsData(null);
+    setMode("select");
+  }, [pages]);
+
+  const togglePageSelection = useCallback((pageNum: number) => {
+    setSelectedPageNums(prev => {
+      const next = new Set(prev);
+      if (next.has(pageNum)) next.delete(pageNum);
+      else next.add(pageNum);
+      return next;
+    });
+  }, []);
+
+  const selectAll = useCallback(() => {
+    setSelectedPageNums(new Set(pages.map(p => p.page_number)));
+  }, [pages]);
+
+  const deselectAll = useCallback(() => {
+    setSelectedPageNums(new Set());
+  }, []);
+
+  useEffect(() => {
+    if (mode !== "select" || selectedPageNums.size === 0 || !sessionId) {
+      setTopicsData(null);
+      return;
+    }
+    let cancelled = false;
+    setTopicsLoading(true);
+    getTopics(sessionId, Array.from(selectedPageNums))
+      .then(data => { if (!cancelled) setTopicsData(data); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setTopicsLoading(false); });
+    return () => { cancelled = true; };
+  }, [mode, selectedPageNums, sessionId]);
 
   const handleCapture = useCallback(
     (blob: Blob) => {
@@ -188,12 +231,16 @@ function TutorContent() {
     [sessionId]
   );
 
+  const selectedPagesArray = Array.from(selectedPageNums);
+
   const handleAsk = useCallback(
     (question: string) => {
       if (!sessionId || pages.length === 0) return;
       const userMsg: Message = { id: Date.now().toString(), role: "user", content: question };
       setMessages(prev => [...prev, userMsg]);
       setLoading(true);
+
+      const pagesToUse = selectedPagesArray.length > 0 ? selectedPagesArray : undefined;
 
       askQuestionSSE(sessionId, question, (event, data) => {
         if (event === "done") {
@@ -215,10 +262,16 @@ function TutorContent() {
           }]);
           setLoading(false);
         }
-      });
+      }, pagesToUse);
     },
-    [sessionId, pages.length]
+    [sessionId, pages.length, selectedPagesArray]
   );
+
+  const handleStarterQuestion = useCallback((q: string) => {
+    setMode("chat");
+    setCameFromChat(false);
+    setTimeout(() => handleAsk(q), 100);
+  }, [handleAsk]);
 
   const handleCitationClick = useCallback((pageNumber: number) => {
     setActivePage(pageNumber);
@@ -256,7 +309,10 @@ function TutorContent() {
           {totalPages > 0 && (
             <span className="text-[10px] px-1.5 py-0.5 rounded"
               style={{ background: "var(--bg-surface)", color: "var(--text-muted)" }}>
-              {pages.length} page{pages.length !== 1 ? "s" : ""}
+              {mode === "select" || mode === "chat"
+                ? `${selectedPageNums.size}/${pages.length} selected`
+                : `${pages.length} page${pages.length !== 1 ? "s" : ""}`
+              }
               {pendingPages.length > 0 && ` + ${pendingPages.length} processing`}
             </span>
           )}
@@ -309,13 +365,13 @@ function TutorContent() {
             </p>
           </div>
           <button onClick={() => setShowQR(false)} className="text-xs" style={{ color: "var(--text-muted)" }}>
-            ✕
+            ×
           </button>
         </div>
       )}
 
-      {/* Page strip — always visible when pages exist */}
-      {(pages.length > 0 || pendingPages.length > 0) && (
+      {/* Page strip — visible in capture and chat modes */}
+      {mode !== "select" && (pages.length > 0 || pendingPages.length > 0) && (
         <div className="px-3 py-2 flex-shrink-0 overflow-hidden"
           style={{ borderBottom: "1px solid var(--border)" }}>
           <div className="flex items-center gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
@@ -326,18 +382,21 @@ function TutorContent() {
                 style={{
                   border: activePage === page.page_number
                     ? "2px solid var(--accent)" : "2px solid transparent",
-                  width: "72px",
+                  width: "56px",
                   background: "var(--bg-surface)",
                 }}>
-                <div className="h-12 flex items-center justify-center">
-                  <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
-                    P{page.page_number}
+                <div className="h-16 relative">
+                  <img
+                    src={getPageImageUrl(sessionId, page.page_number)}
+                    alt={`Page ${page.page_number}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                  <span className="absolute bottom-0 left-0 right-0 text-[9px] text-center py-0.5 font-medium"
+                    style={{ background: "rgba(0,0,0,0.7)", color: "#fff" }}>
+                    {page.page_number}
                   </span>
-                </div>
-                <div className="px-1.5 py-1" style={{ background: "var(--bg-elevated)" }}>
-                  <p className="text-[9px] truncate" style={{ color: "var(--text-secondary)" }}>
-                    {page.headings[0]?.text || `Page ${page.page_number}`}
-                  </p>
                 </div>
               </button>
             ))}
@@ -345,10 +404,10 @@ function TutorContent() {
               <div key={pp.id}
                 className="flex-shrink-0 rounded-lg overflow-hidden"
                 style={{
-                  width: "72px",
+                  width: "56px",
                   border: pp.status === "error" ? "2px solid #ef4444" : "2px solid var(--border)",
                 }}>
-                <div className="h-12 flex items-center justify-center relative"
+                <div className="h-16 flex items-center justify-center relative"
                   style={{ background: "var(--bg-surface)" }}>
                   {pp.status === "error" ? (
                     <span className="text-xs" style={{ color: "#ef4444" }}>!</span>
@@ -356,19 +415,14 @@ function TutorContent() {
                     <>
                       <img src={pp.previewUrl} alt="" className="w-full h-full object-cover opacity-50" />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-5 h-5 rounded-full animate-spin"
+                        <div className="w-4 h-4 rounded-full animate-spin"
                           style={{ border: "2px solid var(--border)", borderTopColor: "var(--accent)" }} />
                       </div>
                     </>
                   ) : (
-                    <div className="w-5 h-5 rounded-full animate-spin"
+                    <div className="w-4 h-4 rounded-full animate-spin"
                       style={{ border: "2px solid var(--border)", borderTopColor: "var(--accent)" }} />
                   )}
-                </div>
-                <div className="px-1.5 py-1" style={{ background: "var(--bg-elevated)" }}>
-                  <p className="text-[9px]" style={{ color: pp.status === "error" ? "#ef4444" : "var(--accent)" }}>
-                    {pp.status === "error" ? "Failed" : pp.status === "uploading" ? "Uploading..." : "Processing..."}
-                  </p>
                 </div>
               </div>
             ))}
@@ -387,14 +441,14 @@ function TutorContent() {
                     Scan your textbook
                   </h2>
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                    Capture pages, then ask questions
+                    Capture pages, then pick which ones to study
                   </p>
                 </div>
               ) : (
                 <p className="text-sm text-center" style={{ color: "var(--text-secondary)" }}>
                   {pendingPages.length > 0
                     ? `Processing ${pendingPages.length} page${pendingPages.length !== 1 ? "s" : ""}... you can keep capturing`
-                    : `${pages.length} page${pages.length !== 1 ? "s" : ""} ready. Add more or start chatting.`
+                    : `${pages.length} page${pages.length !== 1 ? "s" : ""} ready`
                   }
                 </p>
               )}
@@ -409,18 +463,35 @@ function TutorContent() {
 
               {pages.length > 0 && (
                 <button
-                  onClick={() => { setMode("chat"); setCameFromChat(false); }}
+                  onClick={() => {
+                    if (cameFromChat) { setMode("chat"); setCameFromChat(false); }
+                    else enterSelectMode();
+                  }}
                   className="w-full max-w-xs py-3 rounded-xl text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98]"
                   style={{ background: "var(--accent)", color: "white" }}
                 >
                   {cameFromChat
                     ? `Back to chat (${pages.length} page${pages.length !== 1 ? "s" : ""})`
-                    : `Start asking questions (${pages.length} page${pages.length !== 1 ? "s" : ""})`
+                    : `Choose pages to study (${pages.length})`
                   }
                 </button>
               )}
             </div>
           </div>
+        ) : mode === "select" ? (
+          <PageSelectView
+            pages={pages}
+            sessionId={sessionId}
+            selectedPageNums={selectedPageNums}
+            onToggle={togglePageSelection}
+            onSelectAll={selectAll}
+            onDeselectAll={deselectAll}
+            topicsData={topicsData}
+            topicsLoading={topicsLoading}
+            onStartChat={() => { setMode("chat"); setCameFromChat(false); }}
+            onStarterQuestion={handleStarterQuestion}
+            onAddMore={() => setMode("capture")}
+          />
         ) : (
           <ChatPanel
             messages={messages}
@@ -432,5 +503,170 @@ function TutorContent() {
         )}
       </div>
     </main>
+  );
+}
+
+function PageSelectView({
+  pages, sessionId, selectedPageNums, onToggle,
+  onSelectAll, onDeselectAll, topicsData, topicsLoading,
+  onStartChat, onStarterQuestion, onAddMore,
+}: {
+  pages: PageData[];
+  sessionId: string;
+  selectedPageNums: Set<number>;
+  onToggle: (n: number) => void;
+  onSelectAll: () => void;
+  onDeselectAll: () => void;
+  topicsData: TopicsResponse | null;
+  topicsLoading: boolean;
+  onStartChat: () => void;
+  onStarterQuestion: (q: string) => void;
+  onAddMore: () => void;
+}) {
+  const allSelected = selectedPageNums.size === pages.length;
+
+  return (
+    <div className="flex-1 flex flex-col overflow-y-auto">
+      <div className="p-4 space-y-4 max-w-2xl mx-auto w-full">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-medium" style={{ color: "var(--text-primary)" }}>
+              Choose your pages
+            </h2>
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+              {selectedPageNums.size} of {pages.length} selected
+            </p>
+          </div>
+          <button
+            onClick={allSelected ? onDeselectAll : onSelectAll}
+            className="text-[11px] px-2.5 py-1 rounded-md transition-colors"
+            style={{ color: "var(--accent)", border: "1px solid var(--border)" }}
+          >
+            {allSelected ? "Deselect all" : "Select all"}
+          </button>
+        </div>
+
+        {/* Page grid */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
+          {pages.map(page => {
+            const isSelected = selectedPageNums.has(page.page_number);
+            return (
+              <button
+                key={page.page_id}
+                onClick={() => onToggle(page.page_number)}
+                className="rounded-xl overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] relative"
+                style={{
+                  border: isSelected ? "2px solid var(--accent)" : "2px solid var(--border)",
+                  opacity: isSelected ? 1 : 0.5,
+                }}
+              >
+                <div className="aspect-[3/4] relative">
+                  <img
+                    src={getPageImageUrl(sessionId, page.page_number)}
+                    alt={`Page ${page.page_number}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  {/* Selection indicator */}
+                  <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
+                    style={{
+                      background: isSelected ? "var(--accent)" : "rgba(0,0,0,0.4)",
+                      border: isSelected ? "none" : "1.5px solid rgba(255,255,255,0.5)",
+                    }}>
+                    {isSelected && (
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 px-2 py-1.5"
+                    style={{ background: "linear-gradient(transparent, rgba(0,0,0,0.8))" }}>
+                    <p className="text-[10px] font-medium text-white truncate">
+                      {page.headings[0]?.text || `Page ${page.page_number}`}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+
+          {/* Add more pages button */}
+          <button
+            onClick={onAddMore}
+            className="rounded-xl overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] aspect-[3/4] flex flex-col items-center justify-center gap-1.5"
+            style={{ border: "2px dashed var(--border)" }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
+              style={{ color: "var(--text-muted)" }}>
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Add more</span>
+          </button>
+        </div>
+
+        {/* Topics + starter questions */}
+        {selectedPageNums.size > 0 && (
+          <div className="space-y-3 pt-2">
+            {topicsLoading ? (
+              <div className="flex items-center gap-2 py-3">
+                <div className="w-3.5 h-3.5 rounded-full animate-spin"
+                  style={{ border: "2px solid var(--border)", borderTopColor: "var(--accent)" }} />
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>Finding topics...</span>
+              </div>
+            ) : topicsData ? (
+              <>
+                {topicsData.topics.length > 0 && (
+                  <div>
+                    <p className="text-[11px] font-medium uppercase tracking-wider mb-2"
+                      style={{ color: "var(--text-muted)" }}>
+                      Topics covered
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {topicsData.topics.map((topic, i) => (
+                        <span key={i}
+                          className="text-xs px-2.5 py-1 rounded-full"
+                          style={{ background: "var(--bg-surface)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {topicsData.questions.length > 0 && (
+                  <div>
+                    <p className="text-[11px] font-medium uppercase tracking-wider mb-2"
+                      style={{ color: "var(--text-muted)" }}>
+                      Start with a question
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {topicsData.questions.map((q, i) => (
+                        <button key={i}
+                          onClick={() => onStarterQuestion(q)}
+                          className="text-left text-xs px-3 py-2.5 rounded-lg transition-all hover:scale-[1.01] active:scale-[0.99]"
+                          style={{ background: "var(--bg-surface)", color: "var(--text-primary)", border: "1px solid var(--border)" }}>
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : null}
+
+            {/* Start chat button */}
+            <button
+              onClick={onStartChat}
+              disabled={selectedPageNums.size === 0}
+              className="w-full py-3 rounded-xl text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-30"
+              style={{ background: "var(--accent)", color: "white" }}
+            >
+              Start chatting ({selectedPageNums.size} page{selectedPageNums.size !== 1 ? "s" : ""})
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

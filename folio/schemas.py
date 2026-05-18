@@ -50,6 +50,7 @@ class AskRequest(BaseModel):
     session_id: str
     question: str
     lang: str = "en"
+    selected_pages: Optional[list[int]] = None
 
 
 class AskResponse(BaseModel):

@@ -23,6 +23,12 @@ export interface AskResponse {
   pages_used: number[];
 }
 
+export interface TopicsResponse {
+  topics: string[];
+  questions: string[];
+  page_count: number;
+}
+
 export async function createSession(
   mode: "reader" | "tutor",
   lang = "en"
@@ -150,17 +156,35 @@ export function ingestPdfSSE(
   return controller;
 }
 
+export async function getTopics(
+  sessionId: string,
+  selectedPages?: number[]
+): Promise<TopicsResponse> {
+  const res = await fetch(`${API_URL}/api/session/${sessionId}/topics`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ selected_pages: selectedPages }),
+  });
+  if (!res.ok) throw new Error(`Failed to fetch topics: ${res.status}`);
+  return res.json();
+}
+
+export function getPageImageUrl(sessionId: string, pageNumber: number): string {
+  return `${API_URL}/api/session/${sessionId}/page/${pageNumber}/image`;
+}
+
 export function askQuestionSSE(
   sessionId: string,
   question: string,
-  onEvent: (event: string, data: string) => void
+  onEvent: (event: string, data: string) => void,
+  selectedPages?: number[]
 ): AbortController {
   const controller = new AbortController();
 
   fetch(`${API_URL}/api/ask`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ session_id: sessionId, question }),
+    body: JSON.stringify({ session_id: sessionId, question, selected_pages: selectedPages }),
     signal: controller.signal,
   }).then(async (res) => {
     if (!res.ok || !res.body) {

@@ -255,16 +255,65 @@ async def ask_question(req: AskRequest):
     if not session.pages:
         raise HTTPException(400, "No pages captured yet")
 
+    selected = session.pages
+    if req.selected_pages:
+        selected = [p for p in session.pages if p.page_number in req.selected_pages]
+        if not selected:
+            raise HTTPException(400, "None of the selected pages exist in this session")
+
     async def event_stream():
         response = await ask_grounded(
             question=req.question,
-            pages=session.pages,
+            pages=selected,
             session_id=req.session_id,
         )
         yield {"event": "retrieve", "data": f'{{"pages_used": {response.pages_used}}}'}
         yield {"event": "done", "data": response.model_dump_json()}
 
     return EventSourceResponse(event_stream())
+
+
+@app.post("/api/session/{session_id}/topics")
+async def get_topics(session_id: str, req: dict | None = None):
+    """Extract topics and starter questions from selected pages."""
+    session = SESSIONS.get(session_id)
+    if not session:
+        raise HTTPException(404, "Session not found")
+    if not session.pages:
+        raise HTTPException(400, "No pages captured yet")
+
+    selected_pages = (req or {}).get("selected_pages")
+    pages = session.pages
+    if selected_pages:
+        pages = [p for p in session.pages if p.page_number in selected_pages]
+        if not pages:
+            pages = session.pages
+
+    topics = []
+    questions = []
+    for page in pages:
+        for h in page.headings:
+            topic = h.text.strip()
+            if topic and topic not in topics:
+                topics.append(topic)
+        for d in page.diagrams:
+            if d.label and d.label not in topics:
+                topics.append(d.label)
+
+    if topics:
+        for t in topics[:6]:
+            questions.append(f"What is {t.lower()}?")
+    elif pages:
+        first_text = pages[0].text[:200]
+        words = [w for w in first_text.split() if len(w) > 4][:3]
+        for w in words:
+            questions.append(f"Tell me about {w.lower()}")
+
+    return {
+        "topics": topics[:10],
+        "questions": questions[:6],
+        "page_count": len(pages),
+    }
 
 
 @app.post("/api/tts")
