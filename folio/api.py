@@ -165,6 +165,9 @@ async def ingest_page(
 
     image_bytes = await image.read()
 
+    img_path = MEDIA_DIR / f"{session_id}_p{page_number}.jpg"
+    img_path.write_bytes(image_bytes)
+
     async def event_stream():
         yield {"event": "progress", "data": '{"stage": "vision_call_start"}'}
 
@@ -172,27 +175,22 @@ async def ingest_page(
             image_bytes, page_number, session_id=session_id, lang=session.lang
         )
 
-        yield {"event": "progress", "data": '{"stage": "extract_text"}'}
-
         narration = build_narration(page)
         page.narration_text = narration
-
-        # Save raw image
-        img_path = MEDIA_DIR / f"{session_id}_p{page_number}.jpg"
-        img_path.write_bytes(image_bytes)
         page.raw_image_path = str(img_path)
 
         session.pages.append(page)
 
-        yield {"event": "progress", "data": '{"stage": "store"}'}
         yield {"event": "page_complete", "data": page.model_dump_json()}
 
-        # Generate TTS
-        audio_path = await synthesize(narration)
-        yield {
-            "event": "narration",
-            "data": f'{{"narration_text": "{narration[:100]}...", "audio_url": "/api/audio/{audio_path.name}"}}',
-        }
+        try:
+            audio_path = await synthesize(narration)
+            yield {
+                "event": "narration",
+                "data": f'{{"narration_text": "{narration[:100]}...", "audio_url": "/api/audio/{audio_path.name}"}}',
+            }
+        except Exception as e:
+            logger.warning(f"TTS failed for page {page_number}: {e}")
 
     return EventSourceResponse(event_stream())
 

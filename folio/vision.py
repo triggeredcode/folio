@@ -3,16 +3,45 @@
 from __future__ import annotations
 
 import base64
+import io
 import json
 import logging
 from pathlib import Path
 
 import httpx
+from PIL import Image
 
 from .config import OLLAMA_URL, VISION_MODEL, CACHE_DIR, DEMO_MODE
 from .schemas import Page, Heading, Diagram
 
 logger = logging.getLogger(__name__)
+
+MAX_IMAGE_DIM = 1024
+
+
+def _optimize_image(image_bytes: bytes) -> bytes:
+    """Resize large images to speed up vision processing."""
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        w, h = img.size
+        if max(w, h) <= MAX_IMAGE_DIM:
+            return image_bytes
+        scale = MAX_IMAGE_DIM / max(w, h)
+        new_w, new_h = int(w * scale), int(h * scale)
+        img = img.resize((new_w, new_h), Image.LANCZOS)
+        buf = io.BytesIO()
+        fmt = "JPEG" if img.mode in ("RGB", "L") else "PNG"
+        if img.mode == "RGBA":
+            img = img.convert("RGB")
+            fmt = "JPEG"
+        img.save(buf, format=fmt, quality=85)
+        original_kb = len(image_bytes) / 1024
+        optimized_kb = buf.tell() / 1024
+        logger.info(f"Image optimized: {w}x{h} -> {new_w}x{new_h}, {original_kb:.0f}KB -> {optimized_kb:.0f}KB")
+        return buf.getvalue()
+    except Exception as e:
+        logger.warning(f"Image optimization failed: {e}")
+        return image_bytes
 
 PROMPT_PATH = Path(__file__).parent / "prompts" / "extract_page.en.txt"
 SYSTEM_PROMPT = PROMPT_PATH.read_text()
@@ -40,7 +69,8 @@ async def extract_page(
         data = json.loads(cache_path.read_text())
         return Page(page_number=page_number, **data)
 
-    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+    optimized = _optimize_image(image_bytes)
+    image_b64 = base64.b64encode(optimized).decode("utf-8")
 
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
