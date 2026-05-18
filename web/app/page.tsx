@@ -14,7 +14,6 @@ export default function Home() {
 }
 
 function HomeContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const isJoinMode = searchParams.get("join") === "1";
   const [loading, setLoading] = useState(false);
