@@ -141,21 +141,33 @@ function TutorContent() {
     setSelectedPageNums(new Set());
   }, []);
 
+  const topicsFetchedRef = useRef(false);
+
   useEffect(() => {
-    const shouldFetch = (mode === "select" && selectedPageNums.size > 0) ||
-                        (mode === "chat" && !topicsData && pages.length > 0);
-    if (!shouldFetch || !sessionId) return;
-    const pageNums = mode === "select"
-      ? Array.from(selectedPageNums)
-      : pages.map(p => p.page_number);
-    let cancelled = false;
-    setTopicsLoading(true);
-    getTopics(sessionId, pageNums)
-      .then(data => { if (!cancelled) setTopicsData(data); })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setTopicsLoading(false); });
-    return () => { cancelled = true; };
-  }, [mode, selectedPageNums, sessionId, pages.length, topicsData]);
+    topicsFetchedRef.current = false;
+  }, [selectedPageNums]);
+
+  useEffect(() => {
+    if (mode === "select" && selectedPageNums.size > 0 && sessionId) {
+      let cancelled = false;
+      setTopicsLoading(true);
+      getTopics(sessionId, Array.from(selectedPageNums))
+        .then(data => { if (!cancelled) { setTopicsData(data); topicsFetchedRef.current = true; } })
+        .catch(() => {})
+        .finally(() => { if (!cancelled) setTopicsLoading(false); });
+      return () => { cancelled = true; };
+    }
+
+    if (mode === "chat" && !topicsFetchedRef.current && pages.length > 0 && sessionId) {
+      let cancelled = false;
+      setTopicsLoading(true);
+      getTopics(sessionId, pages.map(p => p.page_number))
+        .then(data => { if (!cancelled) { setTopicsData(data); topicsFetchedRef.current = true; } })
+        .catch(() => {})
+        .finally(() => { if (!cancelled) setTopicsLoading(false); });
+      return () => { cancelled = true; };
+    }
+  }, [mode, selectedPageNums, sessionId, pages.length]);
 
   const handleCapture = useCallback(
     (blob: Blob) => {

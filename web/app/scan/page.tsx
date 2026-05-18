@@ -23,7 +23,7 @@ function ScanContent() {
   const [sessionId, setSessionId] = useState(sessionParam || "");
   const [status, setStatus] = useState<"connecting" | "ready" | "error">("connecting");
   const [sentCount, setSentCount] = useState(0);
-  const [uploading, setUploading] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const [lastError, setLastError] = useState("");
   const pageCountRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,18 +66,17 @@ function ScanContent() {
 
       pageCountRef.current++;
       const pageNumber = pageCountRef.current;
-      setUploading(true);
+      setPendingCount(c => c + 1);
       setLastError("");
 
       ingestPageSSE(sessionId, pageNumber, file, (event, data) => {
         if (event === "page_complete") {
           setSentCount(c => c + 1);
-          setUploading(false);
+          setPendingCount(c => c - 1);
         } else if (event === "error") {
           const msg = JSON.parse(data).message || "Upload failed";
           setLastError(msg);
-          setUploading(false);
-          pageCountRef.current--;
+          setPendingCount(c => c - 1);
         }
       });
     },
@@ -136,39 +135,30 @@ function ScanContent() {
           </p>
         </div>
 
-        {/* Big camera button */}
+        {/* Big camera button — never blocked, allows queuing */}
         <button
           onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
           style={{
             width: 160,
             height: 160,
             borderRadius: "50%",
-            border: uploading ? "4px solid #3b82f6" : "4px solid #fff",
-            background: uploading ? "#111" : "transparent",
+            border: "4px solid #fff",
+            background: "transparent",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             gap: 8,
-            cursor: uploading ? "wait" : "pointer",
+            cursor: "pointer",
             transition: "all 0.2s",
           }}
         >
-          {uploading ? (
-            <div style={{
-              width: 32, height: 32, borderRadius: "50%",
-              border: "3px solid #333", borderTopColor: "#3b82f6",
-              animation: "spin 1s linear infinite",
-            }} />
-          ) : (
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-              <circle cx="12" cy="13" r="4"/>
-            </svg>
-          )}
-          <span style={{ fontSize: 12, color: uploading ? "#3b82f6" : "#ccc" }}>
-            {uploading ? "Sending..." : "Take Photo"}
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span style={{ fontSize: 12, color: "#ccc" }}>
+            Take Photo
           </span>
         </button>
 
@@ -177,6 +167,11 @@ function ScanContent() {
           {sentCount > 0 && (
             <p style={{ fontSize: 18, fontWeight: 600, color: "#4ade80" }}>
               {sentCount} page{sentCount !== 1 ? "s" : ""} sent
+            </p>
+          )}
+          {pendingCount > 0 && (
+            <p style={{ fontSize: 13, color: "#3b82f6", marginTop: 4 }}>
+              {pendingCount} uploading...
             </p>
           )}
           {lastError && (
