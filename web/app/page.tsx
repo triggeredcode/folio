@@ -15,12 +15,15 @@ export default function Home() {
 
 function HomeContent() {
   const searchParams = useSearchParams();
-  const isJoinMode = searchParams.get("join") === "1";
   const [loading, setLoading] = useState(false);
   const [appUrl, setAppUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (searchParams.get("join") === "1") {
+      window.location.href = "/scan";
+      return;
+    }
     async function getNetworkUrl() {
       try {
         const res = await fetch("/api/network-info");
@@ -37,12 +40,7 @@ function HomeContent() {
       }
     }
     getNetworkUrl();
-  }, []);
-
-  useEffect(() => {
-    if (!isJoinMode) return;
-    window.location.href = "/scan";
-  }, [isJoinMode]);
+  }, [searchParams]);
 
   async function handleModeSelect(mode: "reader" | "tutor") {
     setLoading(true);
@@ -175,7 +173,7 @@ function HomeContent() {
                 {appUrl ? (
                   <div className="p-4 rounded-2xl inline-block" style={{ background: "white" }}>
                     <QRCodeSVG
-                      value={`${appUrl}?join=1`}
+                      value={`${appUrl}/scan`}
                       size={200}
                       level="M"
                       bgColor="white"
