@@ -1,0 +1,28 @@
+{
+  "text": "Functions forms tissues. Different tissues are organised to form an organ and several organs work together to form organ systems. Such as, nasal pores, nasal cavity, trachea and lungs form respiratory system.\n\nWhen cells are organised into tissues, organs, and organ systems the cell remains the fundamental unit of structure and function in all living organisms. This makes us wonder how such tiny cells perform so many different activities. What do cells in our body communicate with each other? Do cells live forever, or do they die? In this chapter, we will explore the answers to these questions as we enter the fascinating world of cells!\n\nA cell is usually too small to be seen by the unaided eye (Fig. 2.1). This raises an important question\u2014how have cell biologists studied the function of cells that are much smaller than the limit of resolution of the human eye? You have learnt about a convex lens. A convex lens or a combination of lenses, ie., an objective lens and an eyepiece are used for the magnification of an object (Fig. 2.1) to make it appear larger.\n\nRobert Hooke was the first person to observe the cells in 1665 using a self-designed microscope (capable of about 200-300X magnification). While examining a thin slice of cork, he observed small box-like compartments and named them 'cells'. In school laboratories, light microscopes are used to observe objects using",
+  "headings": [
+    {
+      "level": 2,
+      "text": "2.1 How to Study Cells?"
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "diagram_cell_building_block",
+      "label": "Cell: The Building Block of Life",
+      "description": "This diagram is a detailed scale model illustrating the relative sizes of various objects and biological structures, ranging from kilometers down to nanometers. The scale is marked on the left side, starting at 1 km and decreasing through 1 m, 10 \u00b5m, 1 \u00b5m, 100 nm, 10 nm, and 1 nm. Various objects are marked along this scale, including a Rocket (at the 1 km level) and Human height (at the 1 m level). Below this, various biological structures are marked, such as the Nucleus, Mitochondrion, and Ribosomes, which are located around the 10 nm mark. The diagram also includes a magnified view on the right side, labeled 'Light microscope,' showing a cross-section of a cell being viewed. This magnified view illustrates the process of observation, showing the cell structure and the viewing apparatus.",
+      "labels": [
+        "Rocket",
+        "Human height",
+        "Nucleus",
+        "Mitochondrion",
+        "Ribosomes",
+        "Small molecules",
+        "Atoms"
+      ]
+    }
+  ],
+  "captions": [
+    "Fig. 2.1: Size of the objects and its visibility through unideal to ideal eye."
+  ]
+}

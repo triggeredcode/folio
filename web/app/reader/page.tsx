@@ -81,7 +81,10 @@ function ReaderContent() {
         } else if (event === "page_complete") {
           const page: PageData = JSON.parse(data);
           knownPageIds.current.add(page.page_id);
-          setPages((prev) => [...prev, page]);
+          setPages((prev) => {
+            if (prev.some(p => p.page_id === page.page_id)) return prev;
+            return [...prev, page];
+          });
           setActivePage(page.page_number);
           setStatus("Speaking...");
 

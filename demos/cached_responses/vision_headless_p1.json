@@ -12,9 +12,9 @@
   ],
   "diagrams": [
     {
-      "id": "Fig. 3.1",
-      "label": "Plant Cell Diagram",
-      "description": "A simplified, two-dimensional cross-section diagram representing a typical plant cell. The most prominent feature is a large, central, circular structure labeled 'Nucleus'. This nucleus is contained within the cell's boundaries, which are implied by the surrounding text describing the cell wall and membrane.",
+      "id": "fig_3_1",
+      "label": "Typical Plant Cell",
+      "description": "A simplified, cross-section diagram of a plant cell. The overall structure is contained within a visible boundary (representing the cell wall). Inside this boundary, the main internal component shown is a large, central, circular structure labeled 'Nucleus'.",
       "labels": [
         "Nucleus"
       ]

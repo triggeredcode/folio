@@ -101,15 +101,16 @@ function TutorContent() {
     const interval = setInterval(async () => {
       try {
         const data = await getSessionPages(sessionId);
-        if (data.page_count > knownPageIds.current.size) {
-          for (const p of data.pages) {
-            if (!knownPageIds.current.has(p.page_id)) {
-              knownPageIds.current.add(p.page_id);
-              setPages(prev => {
-                if (prev.some(ep => ep.page_id === p.page_id)) return prev;
-                return [...prev, p];
-              });
-            }
+        if (data.page_count > pageCountRef.current) {
+          pageCountRef.current = data.page_count;
+        }
+        for (const p of data.pages) {
+          if (!knownPageIds.current.has(p.page_id)) {
+            knownPageIds.current.add(p.page_id);
+            setPages(prev => {
+              if (prev.some(ep => ep.page_id === p.page_id)) return prev;
+              return [...prev, p];
+            });
           }
         }
       } catch { /* ignore */ }
@@ -177,9 +178,14 @@ function TutorContent() {
             ));
           } else if (event === "page_complete") {
             const page: PageData = JSON.parse(data);
-            knownPageIds.current.add(page.page_id);
-            pageCountRef.current++;
-            setPages(prev => [...prev, page]);
+            if (!knownPageIds.current.has(page.page_id)) {
+              knownPageIds.current.add(page.page_id);
+              pageCountRef.current++;
+              setPages(prev => {
+                if (prev.some(p => p.page_id === page.page_id)) return prev;
+                return [...prev, page];
+              });
+            }
           } else if (event === "pdf_done") {
             setPendingPages(prev => prev.filter(p => p.id !== pendingId));
           } else if (event === "error") {
@@ -217,7 +223,10 @@ function TutorContent() {
         } else if (event === "page_complete") {
           const page: PageData = JSON.parse(data);
           knownPageIds.current.add(page.page_id);
-          setPages(prev => [...prev, page]);
+          setPages(prev => {
+            if (prev.some(p => p.page_id === page.page_id)) return prev;
+            return [...prev, page];
+          });
           setActivePage(page.page_number);
           setPendingPages(prev => prev.filter(p => p.id !== pendingId));
           if (previewUrl) URL.revokeObjectURL(previewUrl);

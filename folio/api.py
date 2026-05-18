@@ -152,13 +152,16 @@ async def get_page_image(session_id: str, page_number: int):
 @app.post("/api/page")
 async def ingest_page(
     session_id: str = Form(...),
-    page_number: int = Form(...),
+    page_number: int = Form(-1),
     image: UploadFile = File(...),
 ):
     """Ingest a single page image. Returns SSE stream with progress + result."""
     session = SESSIONS.get(session_id)
     if not session:
         raise HTTPException(404, "Session not found")
+
+    if page_number <= 0:
+        page_number = max((p.page_number for p in session.pages), default=0) + 1
 
     image_bytes = await image.read()
 
