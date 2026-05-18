@@ -60,6 +60,21 @@ function ScanContent() {
     findSession();
   }, [sessionParam]);
 
+  // Re-discover latest session periodically (handles case where PC creates new session)
+  useEffect(() => {
+    if (sessionParam) return; // explicit session param = don't auto-switch
+    const interval = setInterval(async () => {
+      try {
+        const { sessions } = await getActiveSessions();
+        if (sessions.length > 0 && sessions[0].session_id !== sessionId) {
+          setSessionId(sessions[0].session_id);
+          pageCountRef.current = sessions[0].pages;
+        }
+      } catch { /* ignore */ }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [sessionParam, sessionId]);
+
   const handleFile = useCallback(
     (file: File) => {
       if (!sessionId || !file.type.startsWith("image/")) return;

@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
-import { createSession } from "@/lib/api";
+import { createSession, getActiveSessions } from "@/lib/api";
 
 export default function Home() {
   return (
@@ -46,8 +46,22 @@ function HomeContent() {
     setLoading(true);
     setError(null);
     try {
-      const session = await createSession(mode);
-      window.location.href = `/${mode}?session=${session.session_id}`;
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Connection timed out")), 8000)
+      );
+
+      const work = async () => {
+        try {
+          const { sessions } = await getActiveSessions();
+          const existing = sessions.find(s => s.mode === mode);
+          if (existing) return existing.session_id;
+        } catch { /* fall through to create */ }
+        const session = await createSession(mode);
+        return session.session_id;
+      };
+
+      const sid = await Promise.race([work(), timeout]);
+      window.location.href = `/${mode}?session=${sid}`;
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Unknown error";
       setError(`Connection failed: ${msg}`);
