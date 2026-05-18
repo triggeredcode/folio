@@ -8,7 +8,6 @@ import { createSession } from "@/lib/api";
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [showQR, setShowQR] = useState(false);
   const [appUrl, setAppUrl] = useState("");
 
   useEffect(() => {
@@ -49,110 +48,147 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6"
+    <main className="min-h-screen flex items-center justify-center p-8"
       style={{ background: "var(--bg)" }}>
-      <div className="max-w-md w-full space-y-10 text-center">
-        {/* Title */}
-        <header className="space-y-3">
-          <h1 className="text-5xl font-bold tracking-tight"
-            style={{ color: "var(--text-primary)" }}>
-            folio
-          </h1>
-          <p className="text-base leading-relaxed"
-            style={{ color: "var(--text-secondary)" }}>
-            Point your camera at any textbook page.<br />
-            Ask questions. Get grounded answers.
-          </p>
-        </header>
+      <div className="w-full max-w-5xl flex flex-col lg:flex-row items-center gap-16 lg:gap-20">
 
-        {/* Mode buttons */}
-        <div className="space-y-3">
-          <button
-            onClick={() => handleModeSelect("reader")}
-            disabled={loading}
-            className="group w-full py-4 px-5 rounded-xl text-left flex items-center gap-4 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
-            style={{
-              background: "var(--bg-elevated)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <span className="text-2xl">🔊</span>
-            <div>
-              <div className="font-medium" style={{ color: "var(--text-primary)" }}>Reader</div>
-              <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                Reads pages aloud with diagram descriptions
-              </div>
-            </div>
-          </button>
+        {/* Left side — content */}
+        <div className="flex-1 max-w-lg space-y-8">
+          <header className="space-y-5">
+            <h1 className="text-7xl font-bold tracking-tighter"
+              style={{ color: "var(--text-primary)" }}>
+              folio
+            </h1>
+            <p className="text-xl leading-relaxed"
+              style={{ color: "var(--text-secondary)" }}>
+              Turn any physical textbook into an interactive study companion.
+              Snap pages with your phone, ask questions, get answers
+              grounded <em>only</em> in what&apos;s on the page.
+            </p>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              No cloud. No hallucination. Just your book, understood.
+            </p>
+          </header>
 
-          <button
-            onClick={() => handleModeSelect("tutor")}
-            disabled={loading}
-            className="group w-full py-4 px-5 rounded-xl text-left flex items-center gap-4 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
-            style={{
-              background: "var(--bg-elevated)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <span className="text-2xl">💬</span>
-            <div>
-              <div className="font-medium" style={{ color: "var(--text-primary)" }}>Tutor</div>
-              <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                Chat with your textbook, answers cite the source
+          {/* Mode selection */}
+          <div className="space-y-3">
+            <button
+              onClick={() => handleModeSelect("reader")}
+              disabled={loading}
+              className="group w-full py-4 px-5 rounded-xl text-left flex items-center gap-4 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: "#7c3aed15" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
               </div>
-            </div>
-          </button>
+              <div>
+                <div className="font-medium" style={{ color: "var(--text-primary)" }}>Reader</div>
+                <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  Voice narration with diagram descriptions
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => handleModeSelect("tutor")}
+              disabled={loading}
+              className="group w-full py-4 px-5 rounded-xl text-left flex items-center gap-4 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: "var(--accent-soft)" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <div>
+                <div className="font-medium" style={{ color: "var(--text-primary)" }}>Tutor</div>
+                <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  Chat with your textbook, citations included
+                </div>
+              </div>
+            </button>
+          </div>
+
+          <footer>
+            <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+              Powered by Gemma 4 &middot; Runs locally &middot; Nothing leaves your device
+            </p>
+          </footer>
         </div>
 
-        {/* Connect with Phone */}
-        <div className="pt-2">
-          <button
-            onClick={() => setShowQR(!showQR)}
-            className="w-full py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all"
+        {/* Right side — Phone mockup with QR */}
+        <div className="flex flex-col items-center gap-4">
+          <div
+            className="relative rounded-[2.5rem] p-3 shadow-2xl"
             style={{
-              background: showQR ? "var(--bg-surface)" : "transparent",
-              border: "1px solid var(--border)",
-              color: "var(--text-secondary)",
+              background: "var(--bg-elevated)",
+              border: "3px solid var(--border)",
+              width: "260px",
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-              <line x1="12" y1="18" x2="12.01" y2="18"/>
-            </svg>
-            <span className="text-sm font-medium">
-              {showQR ? "Hide QR" : "Open on Phone"}
-            </span>
-          </button>
+            {/* Phone notch */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 rounded-b-2xl"
+              style={{ background: "var(--bg)" }} />
 
-          {showQR && appUrl && (
-            <div className="mt-4 flex flex-col items-center gap-4 animate-fade-in">
-              <div className="p-4 rounded-2xl" style={{ background: "white" }}>
-                <QRCodeSVG
-                  value={appUrl}
-                  size={200}
-                  level="M"
-                  bgColor="white"
-                  fgColor="#0c0c0f"
-                />
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                  Scan to open Folio on your phone
+            {/* Phone screen */}
+            <div className="rounded-[2rem] overflow-hidden flex flex-col items-center justify-center py-10 px-6"
+              style={{ background: "var(--bg)", minHeight: "380px" }}>
+              <div className="text-center space-y-5">
+                <p className="text-xs font-medium uppercase tracking-widest"
+                  style={{ color: "var(--text-muted)" }}>
+                  Scan to connect
                 </p>
-                <p className="text-[11px] font-mono px-2 py-1 rounded"
-                  style={{ background: "var(--bg-surface)", color: "var(--text-muted)" }}>
-                  {appUrl}
-                </p>
+
+                {appUrl ? (
+                  <div className="p-3 rounded-2xl inline-block" style={{ background: "white" }}>
+                    <QRCodeSVG
+                      value={appUrl}
+                      size={160}
+                      level="M"
+                      bgColor="white"
+                      fgColor="#0c0c0f"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-[160px] h-[160px] mx-auto rounded-xl animate-pulse"
+                    style={{ background: "var(--bg-surface)" }} />
+                )}
+
+                <div className="space-y-1.5">
+                  <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                    Open on your phone to<br />snap pages with camera
+                  </p>
+                  {appUrl && (
+                    <p className="text-[10px] font-mono px-2 py-1 rounded break-all"
+                      style={{ background: "var(--bg-surface)", color: "var(--text-muted)" }}>
+                      {appUrl.replace("https://", "").replace("http://", "")}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-          )}
-        </div>
 
-        <footer>
-          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-            Powered by Gemma 4 &middot; Runs locally &middot; Nothing leaves your device
+            {/* Phone home indicator */}
+            <div className="mx-auto mt-2 w-24 h-1 rounded-full"
+              style={{ background: "var(--border)" }} />
+          </div>
+
+          <p className="text-[11px] text-center max-w-[220px]" style={{ color: "var(--text-muted)" }}>
+            Same Wi-Fi required. Camera works over HTTPS.
           </p>
-        </footer>
+        </div>
       </div>
     </main>
   );
