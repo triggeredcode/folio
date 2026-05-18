@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
-import { createSession, getActiveSessions } from "@/lib/api";
+import { createSession } from "@/lib/api";
 
 export default function Home() {
   return (
@@ -41,16 +41,7 @@ function HomeContent() {
 
   useEffect(() => {
     if (!isJoinMode) return;
-    async function autoJoin() {
-      try {
-        const { sessions } = await getActiveSessions();
-        if (sessions.length > 0) {
-          const latest = sessions[0];
-          window.location.href = `/${latest.mode}?session=${latest.session_id}`;
-        }
-      } catch { /* backend not up */ }
-    }
-    autoJoin();
+    window.location.href = "/scan";
   }, [isJoinMode]);
 
   async function handleModeSelect(mode: "reader" | "tutor") {

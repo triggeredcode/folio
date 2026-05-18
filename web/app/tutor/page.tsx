@@ -87,10 +87,10 @@ function TutorContent() {
           const { ip, port } = await res.json();
           const currentPort = window.location.port || port;
           const proto = window.location.protocol;
-          setSessionUrl(`${proto}//${ip}:${currentPort}/tutor?session=${sessionId}`);
+          setSessionUrl(`${proto}//${ip}:${currentPort}/scan?session=${sessionId}`);
         }
       } catch {
-        setSessionUrl(`${window.location.origin}/tutor?session=${sessionId}`);
+        setSessionUrl(`${window.location.origin}/scan?session=${sessionId}`);
       }
     }
     if (sessionId) buildSessionUrl();
