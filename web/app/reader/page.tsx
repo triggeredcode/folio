@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback, useRef, Suspense } from "react";
+import { useState, useCallback, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import CameraCapture from "@/components/CameraCapture";
 import PageStrip from "@/components/PageStrip";
-import { PageData, ingestPageSSE, generateTTS } from "@/lib/api";
+import { PageData, ingestPageSSE, generateTTS, getSessionPages } from "@/lib/api";
 
 export default function ReaderPage() {
   return (
@@ -23,6 +23,33 @@ function ReaderContent() {
   const [processing, setProcessing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const knownPageIds = useRef(new Set<string>());
+
+  useEffect(() => {
+    if (!sessionId) return;
+    const interval = setInterval(async () => {
+      try {
+        const data = await getSessionPages(sessionId);
+        if (data.page_count > knownPageIds.current.size) {
+          const newPages: PageData[] = [];
+          for (const p of data.pages) {
+            if (!knownPageIds.current.has(p.page_id)) {
+              knownPageIds.current.add(p.page_id);
+              newPages.push(p);
+            }
+          }
+          if (newPages.length > 0) {
+            setPages(prev => {
+              const existingIds = new Set(prev.map(p => p.page_id));
+              const toAdd = newPages.filter(p => !existingIds.has(p.page_id));
+              return toAdd.length > 0 ? [...prev, ...toAdd] : prev;
+            });
+          }
+        }
+      } catch { /* ignore */ }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [sessionId]);
 
   const handleCapture = useCallback(
     (imageBlob: Blob) => {
@@ -40,6 +67,7 @@ function ReaderContent() {
           else if (stage === "store") setStatus("Storing...");
         } else if (event === "page_complete") {
           const page: PageData = JSON.parse(data);
+          knownPageIds.current.add(page.page_id);
           setPages((prev) => [...prev, page]);
           setActivePage(page.page_number);
           setStatus("Speaking...");

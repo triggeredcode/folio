@@ -42,6 +42,12 @@ export async function getSession(sessionId: string) {
   return res.json();
 }
 
+export async function getSessionPages(sessionId: string): Promise<{ page_count: number; pages: PageData[] }> {
+  const res = await fetch(`${API_URL}/api/session/${sessionId}/pages`);
+  if (!res.ok) throw new Error(`Failed to fetch pages: ${res.status}`);
+  return res.json();
+}
+
 export function ingestPageSSE(
   sessionId: string,
   pageNumber: number,

@@ -99,6 +99,38 @@ async def get_session(session_id: str):
     }
 
 
+@app.get("/api/session/{session_id}/pages")
+async def get_session_pages(session_id: str):
+    """Return all pages in a session (for cross-device sync)."""
+    session = SESSIONS.get(session_id)
+    if not session:
+        raise HTTPException(404, "Session not found")
+    pages_out = []
+    for p in session.pages:
+        page_data = p.model_dump(exclude={"raw_image_path"})
+        if p.raw_image_path:
+            page_data["image_url"] = f"/api/session/{session_id}/page/{p.page_number}/image"
+        pages_out.append(page_data)
+    return {"session_id": session_id, "page_count": len(pages_out), "pages": pages_out}
+
+
+@app.get("/api/session/{session_id}/page/{page_number}/image")
+async def get_page_image(session_id: str, page_number: int):
+    """Serve the raw image for a page."""
+    session = SESSIONS.get(session_id)
+    if not session:
+        raise HTTPException(404, "Session not found")
+    for p in session.pages:
+        if p.page_number == page_number and p.raw_image_path:
+            from pathlib import Path
+            img_path = Path(p.raw_image_path)
+            if img_path.exists():
+                suffix = img_path.suffix.lower()
+                media_type = "image/png" if suffix == ".png" else "image/jpeg"
+                return FileResponse(img_path, media_type=media_type)
+    raise HTTPException(404, "Page image not found")
+
+
 @app.post("/api/page")
 async def ingest_page(
     session_id: str = Form(...),

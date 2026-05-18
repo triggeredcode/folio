@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useCallback, Suspense } from "react";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { QRCodeSVG } from "qrcode.react";
 import CameraCapture from "@/components/CameraCapture";
-import PageStrip from "@/components/PageStrip";
 import ChatPanel from "@/components/ChatPanel";
 import PdfUpload from "@/components/PdfUpload";
-import { PageData, ingestPageSSE, ingestPdfSSE, askQuestionSSE } from "@/lib/api";
+import { PageData, ingestPageSSE, ingestPdfSSE, askQuestionSSE, getSessionPages } from "@/lib/api";
 
 interface Message {
   id: string;
@@ -34,6 +34,54 @@ function TutorContent() {
   const [ingesting, setIngesting] = useState(false);
   const [ingestStatus, setIngestStatus] = useState<string | null>(null);
   const [mode, setMode] = useState<"capture" | "chat">("capture");
+  const [showQR, setShowQR] = useState(false);
+  const [sessionUrl, setSessionUrl] = useState("");
+  const knownPageIds = useRef(new Set<string>());
+
+  useEffect(() => {
+    async function buildSessionUrl() {
+      try {
+        const res = await fetch("/api/network-info");
+        if (res.ok) {
+          const { ip, port } = await res.json();
+          const currentPort = window.location.port || port;
+          const proto = window.location.protocol;
+          setSessionUrl(`${proto}//${ip}:${currentPort}/tutor?session=${sessionId}`);
+        }
+      } catch {
+        setSessionUrl(`${window.location.origin}/tutor?session=${sessionId}`);
+      }
+    }
+    if (sessionId) buildSessionUrl();
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    const interval = setInterval(async () => {
+      try {
+        const data = await getSessionPages(sessionId);
+        if (data.page_count > knownPageIds.current.size) {
+          const newPages: PageData[] = [];
+          for (const p of data.pages) {
+            if (!knownPageIds.current.has(p.page_id)) {
+              knownPageIds.current.add(p.page_id);
+              newPages.push(p);
+            }
+          }
+          if (newPages.length > 0) {
+            setPages(prev => {
+              const existingIds = new Set(prev.map(p => p.page_id));
+              const toAdd = newPages.filter(p => !existingIds.has(p.page_id));
+              return toAdd.length > 0 ? [...prev, ...toAdd] : prev;
+            });
+          }
+        }
+      } catch {
+        // backend might be down, ignore
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [sessionId]);
 
   const handleCapture = useCallback(
     (blob: Blob) => {
@@ -51,6 +99,7 @@ function TutorContent() {
             setIngestStatus(`Page ${page_number}: ${stage}...`);
           } else if (event === "page_complete") {
             const page: PageData = JSON.parse(data);
+            knownPageIds.current.add(page.page_id);
             setPages((prev) => [...prev, page]);
           } else if (event === "pdf_done") {
             setIngesting(false);
@@ -63,6 +112,7 @@ function TutorContent() {
         ingestPageSSE(sessionId, pageNumber, blob, (event, data) => {
           if (event === "page_complete") {
             const page: PageData = JSON.parse(data);
+            knownPageIds.current.add(page.page_id);
             setPages((prev) => [...prev, page]);
             setActivePage(page.page_number);
             setIngesting(false);
@@ -105,7 +155,6 @@ function TutorContent() {
 
   return (
     <main className="min-h-screen flex flex-col" style={{ background: "var(--bg)" }}>
-      {/* Minimal header */}
       <header className="px-5 py-3 flex items-center justify-between"
         style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex items-center gap-3">
@@ -132,14 +181,52 @@ function TutorContent() {
               + Add pages
             </button>
           )}
+          <button
+            onClick={() => setShowQR(!showQR)}
+            className="text-xs px-2.5 py-1 rounded-md transition-colors"
+            style={{
+              color: showQR ? "var(--accent)" : "var(--text-muted)",
+              border: `1px solid ${showQR ? "var(--accent)" : "var(--border)"}`,
+            }}
+            title="Show QR code for phone"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+              <rect x="14" y="14" width="3" height="3"/>
+              <line x1="21" y1="14" x2="21" y2="21"/>
+              <line x1="14" y1="21" x2="21" y2="21"/>
+            </svg>
+          </button>
           <a href="/" className="text-xs" style={{ color: "var(--text-muted)" }}>
             Exit
           </a>
         </div>
       </header>
 
+      {/* QR overlay for phone sync */}
+      {showQR && sessionUrl && (
+        <div className="px-5 py-4 flex items-center gap-4 animate-fade-in"
+          style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--border)" }}>
+          <div className="p-2 rounded-lg" style={{ background: "white" }}>
+            <QRCodeSVG value={sessionUrl} size={80} level="M" bgColor="white" fgColor="#0c0c0f" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              Scan with your phone
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+              Join this session to capture pages. Same Wi-Fi required.
+            </p>
+            <p className="text-[10px] font-mono mt-1 break-all" style={{ color: "var(--text-muted)" }}>
+              {sessionUrl.replace(/https?:\/\//, "")}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Ingest status bar */}
         {ingestStatus && (
           <div className="px-5 py-2" style={{ background: "var(--bg-elevated)" }}>
             <div className="flex items-center gap-2">
@@ -151,38 +238,45 @@ function TutorContent() {
           </div>
         )}
 
-        {/* CAPTURE MODE */}
         {mode === "capture" ? (
           <div className="flex-1 flex flex-col items-center overflow-y-auto">
-            {/* Page previews strip */}
             {pages.length > 0 && (
               <div className="w-full px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
-                <div className="flex items-center gap-3 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+                <div className="flex items-center gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
                   {pages.map((page) => (
                     <div key={page.page_id}
-                      className="flex-shrink-0 rounded-lg p-3 min-w-[160px]"
+                      onClick={() => setActivePage(page.page_number)}
+                      className="flex-shrink-0 rounded-lg overflow-hidden cursor-pointer transition-all hover:scale-[1.02]"
                       style={{
-                        background: "var(--bg-elevated)",
                         border: activePage === page.page_number
-                          ? "1px solid var(--accent)"
-                          : "1px solid var(--border)",
+                          ? "2px solid var(--accent)"
+                          : "2px solid var(--border)",
+                        width: "100px",
                       }}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
-                          Page {page.page_number}
-                        </span>
-                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--success)" }} />
+                      {(page as PageData & { image_url?: string }).image_url ? (
+                        <img
+                          src={(page as PageData & { image_url?: string }).image_url}
+                          alt={`Page ${page.page_number}`}
+                          className="w-full h-16 object-cover"
+                          style={{ background: "var(--bg-surface)" }}
+                        />
+                      ) : (
+                        <div className="w-full h-16 flex items-center justify-center"
+                          style={{ background: "var(--bg-surface)" }}>
+                          <span className="text-xs" style={{ color: "var(--text-muted)" }}>P{page.page_number}</span>
+                        </div>
+                      )}
+                      <div className="px-2 py-1.5" style={{ background: "var(--bg-elevated)" }}>
+                        <p className="text-[10px] truncate" style={{ color: "var(--text-secondary)" }}>
+                          {page.headings[0]?.text || `Page ${page.page_number}`}
+                        </p>
                       </div>
-                      <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "var(--text-secondary)" }}>
-                        {page.headings[0]?.text || page.text.slice(0, 60) + "..."}
-                      </p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Camera + upload area */}
             <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6 max-w-lg mx-auto w-full">
               {pages.length === 0 ? (
                 <div className="text-center space-y-1">
@@ -209,7 +303,6 @@ function TutorContent() {
                 </div>
               )}
 
-              {/* Start Chat button — only when pages exist */}
               {pages.length > 0 && (
                 <button
                   onClick={() => setMode("chat")}
@@ -222,7 +315,6 @@ function TutorContent() {
             </div>
           </div>
         ) : (
-          /* CHAT MODE */
           <ChatPanel
             messages={messages}
             onSend={handleAsk}
