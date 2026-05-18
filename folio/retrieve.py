@@ -8,7 +8,7 @@ from collections import Counter
 from .schemas import Page
 
 
-def retrieve_pages(question: str, pages: list[Page], top_k: int = 3) -> list[Page]:
+def retrieve_pages(question: str, pages: list[Page], top_k: int = 5) -> list[Page]:
     """Retrieve relevant pages for a question.
 
     Strategy:
