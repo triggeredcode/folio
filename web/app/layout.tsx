@@ -5,6 +5,12 @@ export const metadata: Metadata = {
   title: "Folio — Reads any book aloud, teaches what it sees",
   description:
     "Point your camera at a textbook page. Folio reads it aloud, describes diagrams, and answers questions grounded only in your book. Powered by Gemma 4.",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({
