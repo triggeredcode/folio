@@ -24,26 +24,39 @@ Built with [Gemma 4 E4B](https://ai.google.dev/gemma) running locally via [Ollam
 ### Setup
 
 ```bash
-# 1. Pull the model (~9 GB)
+# 1. Clone and enter
+git clone https://github.com/triggeredcode/folio.git
+cd folio
+
+# 2. Pull the model (~9 GB)
 ollama pull gemma4:e4b
 
-# 2. Start Ollama
+# 3. Start Ollama (in a separate terminal)
 ollama serve
 
-# 3. Install Python backend
-cd folio
+# 4. Install Python backend
 pip install -e ".[dev]"
 
-# 4. Install frontend
-cd web
-pnpm install
+# 5. Start the backend
+make backend
+```
 
-# 5. Run both services
-cd ..
-bash scripts/run_local.sh
+In another terminal:
+```bash
+# 6. Install and start the frontend
+cd web && pnpm install && pnpm dev
 ```
 
 Open http://localhost:3000 in your browser.
+
+### Demo Mode (no Ollama needed)
+
+To try the app with pre-cached responses (no model download required):
+
+```bash
+FOLIO_DEMO_MODE=1 make backend
+# Then start frontend normally
+```
 
 ### Docker
 
