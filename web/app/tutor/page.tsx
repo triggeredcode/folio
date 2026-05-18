@@ -35,16 +35,28 @@ export default function TutorPage() {
 function TutorContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session") || "";
+  const [sessionError, setSessionError] = useState<string | null>(null);
   const [pages, setPages] = useState<PageData[]>([]);
   const [pendingPages, setPendingPages] = useState<PendingPage[]>([]);
   const [activePage, setActivePage] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"capture" | "chat">("capture");
+  const [cameFromChat, setCameFromChat] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [sessionUrl, setSessionUrl] = useState("");
   const knownPageIds = useRef(new Set<string>());
   const pageCountRef = useRef(0);
+
+  useEffect(() => {
+    if (!sessionId) {
+      setSessionError("No session ID. Go back to the homepage to start.");
+      return;
+    }
+    fetch(`/api/session/${sessionId}`)
+      .then(res => { if (!res.ok) setSessionError("Session not found. It may have expired."); })
+      .catch(() => setSessionError("Cannot reach backend."));
+  }, [sessionId]);
 
   useEffect(() => {
     async function buildSessionUrl() {
@@ -183,6 +195,20 @@ function TutorContent() {
 
   const totalPages = pages.length + pendingPages.length;
 
+  if (sessionError) {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-8" style={{ background: "var(--bg)" }}>
+        <div className="text-center space-y-4">
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{sessionError}</p>
+          <a href="/" className="inline-block px-4 py-2 rounded-lg text-sm font-medium"
+            style={{ background: "var(--accent)", color: "white" }}>
+            Go Home
+          </a>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen flex flex-col" style={{ background: "var(--bg)" }}>
       {/* Header */}
@@ -207,7 +233,7 @@ function TutorContent() {
         <div className="flex items-center gap-2">
           {mode === "chat" && (
             <button
-              onClick={() => setMode("capture")}
+              onClick={() => { setCameFromChat(true); setMode("capture"); }}
               className="text-[11px] px-2 py-1 rounded-md transition-colors"
               style={{ color: "var(--accent)", border: "1px solid var(--accent)" }}
             >
@@ -347,11 +373,14 @@ function TutorContent() {
 
               {pages.length > 0 && (
                 <button
-                  onClick={() => setMode("chat")}
+                  onClick={() => { setMode("chat"); setCameFromChat(false); }}
                   className="w-full max-w-xs py-3 rounded-xl text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98]"
                   style={{ background: "var(--accent)", color: "white" }}
                 >
-                  Start asking questions ({pages.length} page{pages.length !== 1 ? "s" : ""})
+                  {cameFromChat
+                    ? `Back to chat (${pages.length} page${pages.length !== 1 ? "s" : ""})`
+                    : `Start asking questions (${pages.length} page${pages.length !== 1 ? "s" : ""})`
+                  }
                 </button>
               )}
             </div>
@@ -362,7 +391,7 @@ function TutorContent() {
             onSend={handleAsk}
             loading={loading}
             onCitationClick={handleCitationClick}
-            onAddPages={() => setMode("capture")}
+            onAddPages={() => { setCameFromChat(true); setMode("capture"); }}
           />
         )}
       </div>
